@@ -1,0 +1,134 @@
+{
+  "numStartups": 1,
+  "installMethod": "native",
+  "autoUpdates": false,
+  "theme": "light",
+  "customApiKeyResponses": {
+    "approved": [
+      "6v19nfeVV5w-14yzEQAA"
+    ],
+    "rejected": []
+  },
+  "cachedGrowthBookFeatures": {
+    "tengu_event_sampling_config": {},
+    "tengu_log_segment_events": false,
+    "tengu_log_datadog_events": true,
+    "tengu_penguins_enabled": true,
+    "tengu_mcp_tool_search": true,
+    "tengu_chomp_inflection": false,
+    "tengu_marble_sandcastle": false,
+    "tengu_penguins_off": null,
+    "tengu_streaming_text": true,
+    "tengu_silver_lantern": false,
+    "tengu-top-of-feed-tip": {
+      "tip": "",
+      "color": ""
+    },
+    "tengu_pr_status_cli": true,
+    "tengu_ccr_bridge": false,
+    "tengu_mcp_elicitation": false,
+    "tengu_keybinding_customization_release": true,
+    "tengu_post_compact_survey": false,
+    "tengu_marble_anvil": true,
+    "tengu_tool_pear": false,
+    "tengu_scarf_coffee": false,
+    "tengu_copper_lantern": false,
+    "tengu_claudeai_mcp_connectors": true,
+    "tengu_pebble_leaf_prune": false,
+    "tengu_pid_based_version_locking": true,
+    "tengu_frond_boric": {},
+    "tengu_kairos_cron": true,
+    "tengu_herring_clock": false,
+    "tengu_orchid_trellis": false,
+    "tengu_marble_whisper2": true,
+    "tengu_kairos_brief_config": {
+      "enable_slash_command": false
+    },
+    "tengu_amber_quartz": false,
+    "tengu_thinkback": false,
+    "tengu_cicada_nap_ms": 0,
+    "tengu_miraculo_the_bard": false,
+    "tengu_paper_halyard": false,
+    "tengu_miraculo_the_bard2": false,
+    "tengu_marble_lantern_disabled": false,
+    "tengu_vscode_review_upsell": false,
+    "tengu_vscode_onboarding": false,
+    "tengu_quiet_fern": true,
+    "tengu_slate_ridge": true
+  },
+  "firstStartTime": "2026-02-26T11:19:46.728Z",
+  "opusProMigrationComplete": true,
+  "sonnet1m45MigrationComplete": true,
+  "userID": "2bc9798884dc1c248d37270456277217ce01c0e07d11fb14f8b4359e5b05ffba",
+  "cachedChromeExtensionInstalled": false,
+  "changelogLastFetched": 1772159275764,
+  "autoUpdatesProtectedForNative": true,
+  "clientDataCache": {
+    "data": null,
+    "timestamp": 1772106844272
+  },
+  "oauthAccount": {
+    "accountUuid": "fc714cc1-851e-4ebb-a313-7e1fe6f94c5a",
+    "emailAddress": "qq174028@gmail.com",
+    "organizationUuid": "4eeaff6c-1a48-4111-96cf-e32ceaeaecdd",
+    "hasExtraUsageEnabled": false,
+    "accountCreatedAt": "2026-02-26T11:15:47.535585Z",
+    "displayName": "Yao",
+    "organizationRole": "admin",
+    "workspaceRole": null,
+    "organizationName": "Yao‘s Individual Org"
+  },
+  "hasCompletedOnboarding": true,
+  "lastOnboardingVersion": "2.1.59",
+  "lastReleaseNotesSeen": "2.1.59",
+  "projects": {
+    "/Users/caper": {
+      "allowedTools": [],
+      "mcpContextUris": [],
+      "mcpServers": {},
+      "enabledMcpjsonServers": [],
+      "disabledMcpjsonServers": [],
+      "hasTrustDialogAccepted": false,
+      "projectOnboardingSeenCount": 1,
+      "hasClaudeMdExternalIncludesApproved": false,
+      "hasClaudeMdExternalIncludesWarningShown": false,
+      "exampleFiles": [],
+      "lastCost": 0,
+      "lastAPIDuration": 0,
+      "lastAPIDurationWithoutRetries": 0,
+      "lastToolDuration": 0,
+      "lastDuration": 138865651,
+      "lastLinesAdded": 0,
+      "lastLinesRemoved": 0,
+      "lastTotalInputTokens": 0,
+      "lastTotalOutputTokens": 0,
+      "lastTotalCacheCreationInputTokens": 0,
+      "lastTotalCacheReadInputTokens": 0,
+      "lastTotalWebSearchRequests": 0,
+      "lastFpsAverage": 0,
+      "lastFpsLow1Pct": 14.27,
+      "lastModelUsage": {},
+      "lastSessionId": "49f93e8d-cfb5-479c-95db-0bd6b2db4e61",
+      "lastSessionMetrics": {
+        "frame_duration_ms_count": 155,
+        "frame_duration_ms_min": 0.20170899999993708,
+        "frame_duration_ms_max": 108.46445799991488,
+        "frame_duration_ms_avg": 7.004512406433114,
+        "frame_duration_ms_p50": 2.5697919987142086,
+        "frame_duration_ms_p95": 29.448425101302544,
+        "frame_duration_ms_p99": 53.571878538728
+      }
+    }
+  },
+  "hasShownOpus46Notice": {
+    "4eeaff6c-1a48-4111-96cf-e32ceaeaecdd": true
+  },
+  "penguinModeOrgEnabled": false,
+  "officialMarketplaceAutoInstallAttempted": true,
+  "officialMarketplaceAutoInstalled": true,
+  "metricsStatusCache": {
+    "enabled": true,
+    "vcsAccountLinkingEnabled": false,
+    "timestamp": 1773301478609
+  }
+}

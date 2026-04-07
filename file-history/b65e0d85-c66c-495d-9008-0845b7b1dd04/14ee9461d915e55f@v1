@@ -1,0 +1,14 @@
+import { DeckAPI, PassengerAPI, ShopSeatResponse } from './seat.type';
+
+export interface SeatAssignmentsTransformPayload {
+  readonly passengerApi: PassengerAPI;
+  readonly segmentId: number;
+  readonly decksApi: readonly DeckAPI[];
+}
+
+export interface SeatPassengersTransformPayload {
+  readonly passengersApi: ShopSeatResponse['passengers'];
+
+  readonly segmentId: number;
+  readonly decksApi: readonly DeckAPI[];
+}

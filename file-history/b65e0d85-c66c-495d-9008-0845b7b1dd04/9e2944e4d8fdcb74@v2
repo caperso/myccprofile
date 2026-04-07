@@ -1,0 +1,69 @@
+import { getFlatSeats } from '../helpers/getFlatSeats';
+import { Segment, SegmentTransformPayload } from '../types/segment.type';
+import { decksTransform } from './decks.transform';
+import { legendTransform } from './legend.transform';
+import { seatPassengersTransform } from './seatPassengers.transform';
+import { seatSupplierTransform } from './seatSupplier.transform';
+import { removeSeatDetail } from '~app/domain/ancillary/postSale/helpers/removeSeatDetail';
+
+export const segmentsTransform = {
+  toEntity: ({
+    segmentsApi,
+    seatMapsApi,
+    passengersApi,
+    markUp,
+    seatSupplier,
+  }: SegmentTransformPayload): readonly Segment[] =>
+    segmentsApi.map((segmentApi) => {
+      const pnrId = `${segmentApi.pnrID}`;
+      const combinationId = `${segmentApi.id}`;
+
+      const decksApi =
+        seatMapsApi.find((item) => item.segmentIdentifier === segmentApi.segmentIdentifier)
+          ?.decks || [];
+
+      const passengersWithSeatDetail = seatPassengersTransform.toEntity({
+        passengersApi,
+        segmentId: segmentApi.id,
+        decksApi,
+      });
+
+      const passengers = removeSeatDetail(passengersWithSeatDetail);
+
+      const decks = decksTransform.toEntity(
+        decksApi,
+        passengersWithSeatDetail,
+        segmentApi.id,
+      );
+
+      const flattedSeats = getFlatSeats(decks);
+
+      const legend = legendTransform.toEntity(
+        segmentApi.id,
+        flattedSeats,
+        passengersWithSeatDetail,
+      );
+
+      return {
+        pnrId,
+        legId: segmentApi.legID,
+        segmentId: segmentApi.id,
+        segmentIdentifier: segmentApi.segmentIdentifier,
+        // TODO: Remove pnrId, combinationId, replace it with segmentId
+        combinationId,
+        arrivalAirportCode: segmentApi.arrivalAirport?.code,
+        arrivalAirportCity: segmentApi.arrivalAirport?.cityCode,
+        arrivalDateTime: segmentApi.arrivalDateTime,
+        departureAirportCode: segmentApi.departureAirport?.code,
+        departureAirportCity: segmentApi.departureAirport?.cityCode,
+        departureDateTime: segmentApi.departureDateTime,
+        flightNumber: segmentApi.flightNumber,
+        decks,
+        passengers,
+        markUp: markUp ? `${markUp}` : undefined,
+        seatSupplier: seatSupplierTransform.toEntity(seatSupplier),
+        legend,
+        pnrRecordLocator: segmentApi.pnr ? `${segmentApi.pnr}` : '',
+      };
+    }),
+};

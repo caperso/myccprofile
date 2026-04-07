@@ -1,0 +1,38 @@
+import { ShopSeatResponse } from '../../contract/shop.type';
+import { Deck } from './deck.type';
+import { Legend } from './legend.type';
+import { SeatPassenger } from './seat.type';
+import { SeatSupplierTypes } from '~app/domain/kernel/seatMap/schemas/seatSupplier.type';
+
+export interface Segment {
+  readonly pnrId: string;
+  readonly legId: number;
+  readonly segmentId: number;
+  readonly segmentIdentifier: string;
+  readonly combinationId: string;
+  readonly departureAirportCode: string;
+  readonly departureAirportCity: string;
+  readonly departureDateTime: string;
+  readonly arrivalAirportCode: string;
+  readonly arrivalAirportCity: string;
+  readonly arrivalDateTime: string;
+  readonly passengers: readonly SeatPassenger[];
+  readonly decks: readonly Deck[];
+  readonly markUp?: string;
+  readonly seatSupplier?: SeatSupplierTypes;
+  readonly legend: Legend;
+  readonly pnrRecordLocator: string;
+  readonly flightNumber: string;
+}
+
+export interface SegmentTransformPayload {
+  readonly segmentsApi: ShopSeatResponse['segments'];
+  readonly seatMapsApi: ShopSeatResponse['seatMaps'];
+  readonly passengersApi: ShopSeatResponse['passengers'];
+  readonly markUp?: ShopSeatResponse['markUp'];
+  readonly seatSupplier: ShopSeatResponse['seatSupplier'];
+}
+
+export interface SeatResponsePayload {
+  readonly segments: readonly Segment[];
+}

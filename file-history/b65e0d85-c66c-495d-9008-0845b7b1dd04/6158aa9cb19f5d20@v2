@@ -1,0 +1,69 @@
+import { segmentsTransform } from '../segments.transform';
+
+describe('segmentsTransform ', () => {
+  describe('toEntity', () => {
+    it('return empty decks when seatMapsApi cannot match segmentsApi', () => {
+      const result = segmentsTransform.toEntity({
+        segmentsApi: [{ id: 2, pnrID: 1, segmentIdentifier: 'SEG-001' } as any],
+        seatMapsApi: [{ segmentId: 1, segmentIdentifier: 'SEG-001', decks: [], validatingCarrier: '' }],
+        passengersApi: [],
+        markUp: 5,
+        seatSupplier: '',
+      });
+
+      expect(result).toEqual([
+        {
+          combinationId: `1-2`,
+          decks: [],
+          legend: {},
+          markUp: '5',
+          passengers: [],
+          pnrId: '1',
+          departureAirportCity: undefined,
+          departureAirportCode: undefined,
+          departureDateTime: undefined,
+          legId: undefined,
+          arrivalAirportCity: undefined,
+          arrivalAirportCode: undefined,
+          arrivalDateTime: undefined,
+          flightNumber: undefined,
+          seatSupplier: undefined,
+          segmentId: 2,
+          segmentIdentifier: 'SEG-001',
+          pnrRecordLocator: '',
+        },
+      ]);
+    });
+
+    it('return undefined markUp when markUp is undefined', () => {
+      const resultWithoutMarkup = segmentsTransform.toEntity({
+        segmentsApi: [{ id: 2, pnrID: 1, pnr: 'PNR123', segmentIdentifier: 'SEG-002' } as any],
+        seatMapsApi: [{ segmentId: 1, segmentIdentifier: 'SEG-002', decks: [], validatingCarrier: '' }],
+        passengersApi: [],
+        markUp: undefined,
+        seatSupplier: '',
+      });
+      expect(resultWithoutMarkup).toEqual([
+        {
+          combinationId: `1-2`,
+          decks: [],
+          legend: {},
+          passengers: [],
+          pnrId: '1',
+          departureAirportCity: undefined,
+          departureAirportCode: undefined,
+          departureDateTime: undefined,
+          legId: undefined,
+          arrivalAirportCity: undefined,
+          arrivalAirportCode: undefined,
+          arrivalDateTime: undefined,
+          flightNumber: undefined,
+          seatSupplier: undefined,
+          segmentId: 2,
+          segmentIdentifier: 'SEG-002',
+          pnrRecordLocator: 'PNR123',
+        },
+      ]);
+    });
+  });
+});
