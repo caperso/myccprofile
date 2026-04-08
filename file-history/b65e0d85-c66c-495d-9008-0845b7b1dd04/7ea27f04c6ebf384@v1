@@ -1,0 +1,16 @@
+import { PurchasedSeat } from '~app/domain/ancillary/postSale/types/seat.type';
+import { SeatAssignment } from '~app/domain/account/passengers/types/seatAssignment.type';
+import { SeatAssignmentStatus } from '../constants';
+
+export const purchasedSeatTransform = {
+  toEntity: (
+    seatAssignmentsApi: readonly SeatAssignment[],
+    pnrId: string,
+  ): readonly PurchasedSeat[] =>
+    seatAssignmentsApi.map((item) => ({
+      status: SeatAssignmentStatus.PURCHASED,
+      seatKey: item.seat,
+      segmentId: item.segmentId,
+      pnrId,
+    })),
+};

@@ -1,0 +1,118 @@
+import { IResponseBody } from '~app/infrastructure/soa/type';
+import { AncillaryProductType, AncillaryScene, AncillaryUpdateOperationType } from './constants';
+import { ShopBaggageResponse, ShopSeatResponse } from './contract/shop.type';
+import { EligibleProductsAPI } from './postSale/schemas/product.api.schema';
+import {
+  InitiateCheckoutRequestAPI,
+  InitiateCheckoutResponseAPI,
+} from './postSale/schemas/initiateCheckout.api.schema';
+
+export interface AncillaryCommonResponsePayload extends IResponseBody {
+  readonly responseHeader: {
+    readonly transactionID?: string;
+    readonly serverIP?: string;
+  };
+  readonly businessStatus?: {
+    readonly success: boolean;
+    readonly error?: {
+      readonly errorCode?: string;
+      readonly errorMessage?: string;
+    };
+  };
+}
+
+interface AncillaryCommonRequestBody {
+  readonly productType: AncillaryProductType;
+  readonly orderNumber: string;
+  readonly shoppingCartId: string;
+}
+
+interface AncillaryCommonRequestHeader {
+  readonly scene: AncillaryScene;
+}
+
+export interface AncillaryCommonRequestPayload {
+  readonly requestHeader: AncillaryCommonRequestHeader;
+  readonly requestBody: AncillaryCommonRequestBody;
+}
+
+export interface SeatAssignmentsPayload {
+  readonly segmentId: number;
+  readonly seat: string;
+}
+
+export interface SelectedSeatPayload {
+  readonly passengers: readonly {
+    readonly id: number;
+    readonly seatAssignments: readonly SeatAssignmentsPayload[];
+  }[];
+}
+
+export interface ShopSelectedItemAPI {
+  readonly legIds: readonly number[];
+  readonly pnrId: string;
+  readonly selectedBaggage: { readonly code?: string; readonly bundleCode?: string };
+  readonly doNotChange: boolean;
+}
+
+export interface BaggageShopSelectedPassengerAPI {
+  readonly id: number;
+  readonly checkedBaggageSelections: readonly ShopSelectedItemAPI[];
+  readonly cabinBaggageSelections: readonly ShopSelectedItemAPI[];
+}
+
+export interface BaggageShopSelectedAPI {
+  readonly passengers: readonly BaggageShopSelectedPassengerAPI[];
+}
+
+export interface AncillaryUpdateRequestPayload extends AncillaryCommonRequestPayload {
+  readonly requestBody: AncillaryCommonRequestBody & {
+    readonly operationType: AncillaryUpdateOperationType;
+    readonly extended?: {
+      readonly selectedBaggage?: BaggageShopSelectedAPI;
+      readonly selectedSeat?: SelectedSeatPayload;
+    };
+  };
+}
+
+export interface AncillaryUpdateResponsePayload extends AncillaryCommonResponsePayload {
+  readonly responseBody: AncillaryCommonRequestBody & {
+    readonly operationType?: AncillaryUpdateOperationType;
+  };
+}
+
+export interface SeatShopRequestPayload extends AncillaryCommonRequestPayload {}
+
+export interface SeatShopResponsePayload extends AncillaryCommonResponsePayload {
+  readonly responseBody: {
+    readonly seat: ShopSeatResponse;
+  };
+}
+
+export interface BaggageShopRequestPayload extends AncillaryCommonRequestPayload {}
+
+export interface BaggageShopResponsePayload extends AncillaryCommonRequestPayload {
+  readonly responseBody: {
+    readonly baggage: ShopBaggageResponse;
+  };
+}
+
+export interface PostSaleEligibilityRequestPayload {
+  readonly requestBody: {
+    readonly orderNumber: string;
+  };
+  readonly requestHeader: AncillaryCommonRequestHeader;
+}
+
+export interface PostSaleEligibilityResponsePayload extends AncillaryCommonResponsePayload {
+  readonly responseBody: EligibleProductsAPI;
+}
+
+export interface PostSaleInitiateCheckoutRequestPayload {
+  readonly requestBody: InitiateCheckoutRequestAPI;
+  readonly requestHeader: AncillaryCommonRequestHeader;
+}
+
+export interface PostSaleInitiateCheckoutResponsePayload extends AncillaryCommonResponsePayload {
+  readonly responseBody: InitiateCheckoutResponseAPI;
+}

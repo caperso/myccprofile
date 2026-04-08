@@ -1,0 +1,126 @@
+import { SeatMapDetail__Output as SeatMapDetail } from '@xivart/proto-postsale/types/travix/postsale/producthub/seathub/v1/SeatMapDetail';
+import { TravixDecimal__Output as TravixDecimal } from '@xivart/proto-postsale/types/travix/postsale/common/v1/TravixDecimal';
+
+import {
+  PassengerType,
+  PassengerTypes,
+} from '~app/domain/kernel/passengers/types/passengerType.type';
+import { SeatType } from './legend.type';
+import { SeatPositionTypes, SeatAssignmentStatus } from '../constants';
+import { SeatAssignment } from './seatPassenger.type';
+import {
+  ShopSeatResponse,
+  SeatMap as SeatMapAPI,
+  Deck as DeckAPI,
+  Passenger as PassengerAPI,
+  Compartment as CompartmentAPI,
+  Row as RowAPI,
+  Seat as SeatAPI,
+  Segment as SegmentAPI,
+  SeatPrice,
+  SeatMapDetail as SeatMapDetailAPI,
+} from '../../contract/shop.type';
+
+interface SeatPriceAPI {
+  readonly [key: string]: TravixDecimal;
+}
+
+export interface SeatPriceMap {
+  readonly [passengerIndex: string]: number | undefined;
+}
+
+interface PurchasedSeat {
+  readonly seatKey: string;
+  readonly status: SeatAssignmentStatus;
+  readonly segmentId: number;
+  readonly pnrId: string;
+}
+
+export interface PurchasedSeatMultiPnr {
+  readonly seatKey: string;
+  readonly status: SeatAssignmentStatus;
+  readonly segmentId: number;
+}
+
+interface SeatPassengerWithDetail {
+  readonly passengerIndex: string;
+  readonly type: PassengerTypes;
+  readonly seatAssignments: readonly SeatAssignment[];
+  readonly seatMapDetails: readonly SeatMapDetail[];
+}
+
+export interface SeatPassenger {
+  readonly passengerIndex: string;
+  readonly type: PassengerTypes;
+  readonly seatAssignments: readonly SeatAssignment[];
+}
+
+type SeatPositionType =
+  | SeatPositionTypes.Aisle
+  | SeatPositionTypes.Center
+  | SeatPositionTypes.Window;
+
+interface Seat {
+  readonly groupedSeats?: readonly Seat[];
+  readonly isFacility: boolean;
+  readonly isSelectable: boolean;
+  readonly hasBulkhead: boolean;
+  readonly priceMap?: SeatPriceMap;
+  readonly seatKey: string;
+  readonly seatPosition: SeatPositionType;
+  readonly type: SeatType;
+  readonly unsuitablePassengerTypes?: readonly PassengerType[];
+}
+
+interface SeatSelection {
+  readonly seatKey: string;
+  readonly seatPrice: number;
+  readonly passengerIndex: string;
+  readonly firstName: string;
+  readonly lastName: string;
+  readonly segmentId: number;
+  readonly combinationId: string;
+  readonly pnrId: string;
+  readonly pnr: string;
+  readonly type: SeatType;
+  readonly status: SeatAssignmentStatus;
+}
+
+interface SelectedSeatProduct {
+  readonly seatKey: string;
+  readonly passengerIndex: string;
+}
+
+export interface SelectSeatAssignment {
+  readonly segmentId: number;
+  readonly pnrId: string;
+  readonly selectedSeatProducts: readonly SelectedSeatProduct[];
+}
+
+export interface ChangeSeatProductsPayload {
+  readonly orderNumber: string;
+  readonly postSaleShoppingCartId: string;
+  readonly seatAssignments: readonly SelectSeatAssignment[];
+}
+
+export {
+  ShopSeatResponse,
+  SeatPassengerWithDetail,
+  SeatSelection,
+  Seat,
+  SeatPositionType,
+  SeatPrice,
+  SeatPriceAPI,
+  PurchasedSeat,
+};
+
+export {
+  SeatMapAPI,
+  DeckAPI,
+  PassengerAPI,
+  CompartmentAPI,
+  RowAPI,
+  SeatAPI,
+  SegmentAPI,
+  SeatMapDetailAPI,
+};

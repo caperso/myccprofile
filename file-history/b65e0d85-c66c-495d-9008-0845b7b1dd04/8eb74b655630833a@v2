@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": ["Bash(npx tsc:*)"]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "npx tsc --noEmit"
+          }
+        ]
+      }
+    ]
+  }
+}

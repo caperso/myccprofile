@@ -1,0 +1,36 @@
+import { PassengerTypes } from '~app/domain/kernel/passengers/types/passengerType.type';
+import { SeatPassengerWithDetail } from '../types/seat.type';
+import { seatAssignmentsTransform } from '~app/domain/ancillary/postSale/transforms/seatAssignments.transform';
+import { SeatPassengersTransformPayload } from '../types/seatAssignment.type';
+import { seatMapDetailsTransform } from './seatMapDetails.transform';
+
+// const PassengerTypeMap = {
+//   PASSENGER_TYPE_ADULT: PassengerTypes.Adult,
+//   PASSENGER_TYPE_CHILD: PassengerTypes.Child,
+//   PASSENGER_TYPE_INFANT: PassengerTypes.Infant,
+// };
+
+export const seatPassengersTransform = {
+  toEntity: ({
+    passengersApi,
+    segmentIdentifier,
+    decksApi,
+  }: SeatPassengersTransformPayload): readonly SeatPassengerWithDetail[] => {
+    const passengers: SeatPassengerWithDetail[] = [];
+
+    passengersApi.forEach((passengerApi) =>
+      passengers.push({
+        passengerIndex: `${passengerApi.id}`,
+        seatAssignments: seatAssignmentsTransform.toEntity({
+          passengerApi,
+          segmentIdentifier,
+          decksApi,
+        }),
+        seatMapDetails: seatMapDetailsTransform.toEntity(passengerApi.seatMapDetails, segmentIdentifier),
+        type: passengerApi.type as PassengerTypes,
+      }),
+    );
+
+    return passengers;
+  },
+};

@@ -1,0 +1,48 @@
+import {
+  passengerIndexFixture1,
+  passengerIndexFixture2,
+  seatPassengersWithPricesFixture,
+} from '../__fixtures__/seatPassengers.fixture';
+import { legendTransform } from '../legend.transform';
+import { legendItemTransform } from '../legendItem.transform';
+import { PassengerTypes } from '~app/domain/kernel/passengers/types/passengerType.type';
+
+describe('legendTransform', () => {
+  (legendItemTransform.toEntity as jest.Mock) = jest.fn(() => 'LegendItem');
+
+  describe('toEntity', () => {
+    it('should return Legend by each pax', () => {
+      const result = legendTransform.toEntity(1, [], seatPassengersWithPricesFixture);
+
+      expect(legendItemTransform.toEntity).toHaveBeenNthCalledWith(
+        1,
+        [],
+        { key: { number: '16' } },
+        PassengerTypes.Adult,
+      );
+      expect(legendItemTransform.toEntity).toHaveBeenNthCalledWith(
+        2,
+        [],
+        { key: { number: '10' } },
+        PassengerTypes.Child,
+      );
+      expect(result).toStrictEqual({
+        [passengerIndexFixture1]: 'LegendItem',
+        [passengerIndexFixture2]: 'LegendItem',
+      });
+    });
+
+    it('should return empty when segment not matched', () => {
+      (legendItemTransform.toEntity as jest.Mock) = jest.fn(() => ({}));
+
+      const result = legendTransform.toEntity(100, [], seatPassengersWithPricesFixture);
+
+      expect(legendItemTransform.toEntity).toHaveBeenNthCalledWith(1, [], {}, PassengerTypes.Adult);
+      expect(legendItemTransform.toEntity).toHaveBeenNthCalledWith(2, [], {}, PassengerTypes.Child);
+      expect(result).toStrictEqual({
+        [passengerIndexFixture1]: {},
+        [passengerIndexFixture2]: {},
+      });
+    });
+  });
+});

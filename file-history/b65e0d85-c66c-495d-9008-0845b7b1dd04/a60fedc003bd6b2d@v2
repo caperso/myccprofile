@@ -1,0 +1,66 @@
+import { seatAssignmentsTransform } from '~app/domain/ancillary/postSale/transforms/seatAssignments.transform';
+import { seatPassengersApiFixture } from '../__fixtures__/seatPassengers.fixture';
+import { decksApiFixture } from '../__fixtures__/decks.fixture';
+import { seatApiFixture2 } from '../__fixtures__/seatRows.fixture';
+import {
+  seatAssignmentsApiFixture,
+  seatMapDetailsApiFixture,
+} from '../__fixtures__/seatAssignments.fixture';
+import { flatSeatMap } from '../../helpers/flatSeatMap';
+import { SeatAssignmentStatus } from '../../constants';
+import { SeatAssignmentsTransformPayload } from '../../types/seatAssignment.type';
+
+jest.mock('../../helpers/flatSeatMap');
+
+describe('seatAssignmentsTransform', () => {
+  (flatSeatMap as jest.Mock).mockImplementation(() => ({ '2B': seatApiFixture2 }));
+
+  const payload: SeatAssignmentsTransformPayload = {
+    passengerApi: {
+      ...seatPassengersApiFixture[0],
+      seatAssignments: seatAssignmentsApiFixture,
+      seatMapDetails: seatMapDetailsApiFixture,
+    },
+    segmentIdentifier: 'SEG-001',
+    decksApi: decksApiFixture,
+  };
+
+  describe('toEntity', () => {
+    it('should transform the correct data', () => {
+      const result1 = seatAssignmentsTransform.toEntity(payload);
+
+      const result2 = seatAssignmentsTransform.toEntity({
+        ...payload,
+        segmentIdentifier: 'SEG-002',
+      });
+
+      expect(result1).toStrictEqual([
+        {
+          seatKey: '2B',
+          status: SeatAssignmentStatus.IN_SHOPPING,
+          seatDisplayPrice: 15,
+          type: 'Standard',
+        },
+      ]);
+
+      expect(result2).toStrictEqual([
+        {
+          seatKey: '2B',
+          status: SeatAssignmentStatus.PURCHASED,
+          seatDisplayPrice: 0,
+          type: 'Standard',
+        },
+      ]);
+    });
+
+    it('should throw Error', () => {
+      (flatSeatMap as jest.Mock).mockImplementation(() => ({}));
+
+      expect(() => {
+        seatAssignmentsTransform.toEntity({
+          ...payload,
+        });
+      }).toThrow();
+    });
+  });
+});

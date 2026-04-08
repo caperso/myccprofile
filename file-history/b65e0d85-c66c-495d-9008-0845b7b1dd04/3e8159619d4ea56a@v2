@@ -1,0 +1,28 @@
+import { Seat, SeatPassengerWithDetail } from '../types/seat.type';
+import { PassengerTypes } from '~app/domain/kernel/passengers/types/passengerType.type';
+import { legendItemTransform } from './legendItem.transform';
+import { Legend } from '../types/legend.type';
+
+export const legendTransform = {
+  toEntity: (
+    segmentIdentifier: string,
+    seats: readonly Seat[],
+    passengers: readonly SeatPassengerWithDetail[],
+  ): Legend =>
+    passengers.reduce<Legend>((acc, passenger) => {
+      if (passenger.type === PassengerTypes.Infant) {
+        return acc;
+      }
+
+      const seatMapDetails = passenger.seatMapDetails.find(
+        (item) => item.segmentIdentifier === segmentIdentifier,
+      );
+
+      const prices = seatMapDetails ? seatMapDetails.seatDisplayPrices : {};
+
+      return {
+        ...acc,
+        [passenger.passengerIndex]: legendItemTransform.toEntity(seats, prices, passenger.type),
+      };
+    }, {}),
+};

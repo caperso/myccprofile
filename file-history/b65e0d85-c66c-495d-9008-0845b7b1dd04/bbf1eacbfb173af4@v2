@@ -1,0 +1,63 @@
+import { SeatAssignment, SeatMapDetail } from '~app/domain/ancillary/contract/shop.type';
+import { SeatAssignmentStatus } from '../../constants';
+
+// eslint-disable-next-line functional/prefer-readonly-type
+export const seatAssignmentsApiFixture: SeatAssignment[] = [
+  {
+    seat: '2B',
+    segmentId: 1,
+    segmentIdentifier: 'SEG-001',
+    status: SeatAssignmentStatus.IN_SHOPPING,
+    token: '1',
+  },
+  {
+    seat: '2B',
+    segmentId: 2,
+    segmentIdentifier: 'SEG-002',
+    status: SeatAssignmentStatus.PURCHASED,
+    token: '1',
+  },
+];
+
+// eslint-disable-next-line functional/prefer-readonly-type
+export const seatMapDetailsApiFixture: SeatMapDetail[] = [
+  {
+    currency: 'EUR',
+    seatCurrency: 'EUR',
+    seatPrices: [],
+    seatDisplayPrices: { '2B': 15 },
+    segmentId: 1,
+    segmentIdentifier: 'SEG-001',
+    status: '',
+    markUp: 5,
+    mandatoryFee: { '2B': 15 },
+  },
+  {
+    currency: 'EUR',
+    seatCurrency: 'EUR',
+    seatPrices: [],
+    seatDisplayPrices: {},
+    segmentId: 2,
+    segmentIdentifier: 'SEG-002',
+    status: '',
+    markUp: 5,
+    mandatoryFee: { '2B': 15 },
+  },
+];
+
+export const accountSeatAssignmentsFixture: readonly SeatAssignment[] = [
+  {
+    seat: '2B',
+    segmentId: 1,
+    segmentIdentifier: 'SEG-001',
+    status: SeatAssignmentStatus.PURCHASED,
+    token: '',
+  },
+  {
+    seat: '2B',
+    segmentId: 2,
+    segmentIdentifier: 'SEG-002',
+    status: SeatAssignmentStatus.PURCHASED,
+    token: '',
+  },
+];

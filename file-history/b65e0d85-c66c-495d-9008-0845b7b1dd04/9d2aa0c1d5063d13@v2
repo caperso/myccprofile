@@ -1,0 +1,75 @@
+import { seatRowTransform } from '../seatRow.transform';
+import { seatTransform } from '../seat.transform';
+import { seatPassengersWithDetailsFixture } from '../__fixtures__/seatPassengers.fixture';
+import {
+  compartmentsApiFixture,
+  compartmentsWithEmptyRowsApiFixture,
+} from '../__fixtures__/seatRows.fixture';
+
+describe('seatRowTransform', () => {
+  (seatTransform.toEntity as jest.Mock) = jest.fn(() => 'Seats');
+
+  const segmentIdentifier = 'SEG-001';
+
+  const [
+    {
+      rows: [{ number: rowNumber }],
+    },
+  ] = compartmentsApiFixture;
+
+  describe('toEntity', () => {
+    it('should transform data and call required transforms', () => {
+      const result = seatRowTransform.toEntity(
+        compartmentsApiFixture,
+        seatPassengersWithDetailsFixture,
+        segmentIdentifier,
+      );
+
+      expect(seatTransform.toEntity).toHaveBeenCalledWith(
+        seatPassengersWithDetailsFixture,
+        compartmentsApiFixture[0].rows[0],
+        {
+          WINDOW: 'window',
+        },
+        segmentIdentifier,
+      );
+      expect(result).toEqual([
+        {
+          hasBulkhead: false,
+          hasExit: false,
+          hasOverwing: false,
+          hasStairs: false,
+          key: '0-0',
+          number: rowNumber,
+          seats: 'Seats',
+        },
+      ]);
+    });
+
+    it('should return data filtered by raw rows value', () => {
+      const result = seatRowTransform.toEntity(
+        compartmentsWithEmptyRowsApiFixture,
+        seatPassengersWithDetailsFixture,
+        segmentIdentifier,
+      );
+
+      expect(result).toEqual([
+        {
+          hasBulkhead: false,
+          hasExit: false,
+          hasOverwing: false,
+          hasStairs: false,
+          key: '0-0',
+          number: rowNumber,
+          seats: 'Seats',
+        },
+      ]);
+    });
+
+    it('should return undefined if no seat rows was transformed', () => {
+      const result = seatRowTransform.toEntity([], seatPassengersWithDetailsFixture, 'SEG-002');
+
+      expect(result).toBeUndefined();
+    });
+  });
+});

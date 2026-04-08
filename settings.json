@@ -8,7 +8,17 @@
     "ANTHROPIC_MODEL": "MiniMax-M2.7",
     "ANTHROPIC_REASONING_MODEL": "MiniMax-M2.7",
     "API_TIMEOUT_MS": "3000000",
-    "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": 1
+    "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1"
   },
-  "includeCoAuthoredBy": false
+  "includeCoAuthoredBy": false,
+  "permissions": {
+    "allow": [
+      "Bash(npx prettier:*)",
+      "Bash(git config:*)",
+      "Bash(git for-each-ref:*)",
+      "Bash(git version:*)",
+      "Bash(git --version)",
+      "Bash(brew list:*)"
+    ]
+  }
 }

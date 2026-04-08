@@ -1,0 +1,47 @@
+import {
+  AncillaryUpdateOperationType,
+  AncillaryProductType,
+} from '~app/domain/ancillary/constants';
+import { ChangeSeatProductsPayload } from '~app/domain/ancillary/postSale/types/seat.type';
+import {
+  AncillaryUpdateRequestPayload,
+  SelectedSeatPayload,
+} from '~app/domain/ancillary/soa.api.type';
+
+export const changeSeatPayloadTransform = (
+  payload: ChangeSeatProductsPayload,
+): AncillaryUpdateRequestPayload['requestBody'] => {
+  const passengerMap = new Map<string, Array<{ segmentId: number; segmentIdentifier: string; seat: string }>>();
+
+  payload.seatAssignments.forEach((assignment) => {
+    assignment.selectedSeatProducts.forEach((product) => {
+      if (!passengerMap.has(product.passengerIndex)) {
+        passengerMap.set(product.passengerIndex, []);
+      }
+      passengerMap.get(product.passengerIndex)!.push({
+        segmentId: assignment.segmentId,
+        segmentIdentifier: assignment.segmentIdentifier,
+        seat: product.seatKey,
+      });
+    });
+  });
+
+  const passengers: SelectedSeatPayload['passengers'] = Array.from(passengerMap.entries()).map(
+    ([passengerId, seatAssignments]) => ({
+      id: Number(passengerId),
+      seatAssignments,
+    }),
+  );
+
+  const requestBody: AncillaryUpdateRequestPayload['requestBody'] = {
+    operationType: AncillaryUpdateOperationType.Add,
+    productType: AncillaryProductType.SEAT,
+    orderNumber: payload.orderNumber,
+    shoppingCartId: payload.postSaleShoppingCartId,
+    extended: {
+      selectedSeat: { passengers },
+    },
+  };
+
+  return requestBody;
+};

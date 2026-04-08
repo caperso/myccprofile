@@ -1,0 +1,196 @@
+import { seatPriceMapTransform } from '../seatPriceMap.transform';
+import { PassengerTypes } from '~app/domain/kernel/passengers/types/passengerType.type';
+import { SeatPassengerWithDetail } from '../../types/seat.type';
+
+describe('seatPriceListTransform', () => {
+  describe('toEntity', () => {
+    const seatKey = '1A';
+    const segmentId = 0;
+
+    it('should return empty object when passengers array is empty', () => {
+      const result = seatPriceMapTransform.toEntity(seatKey, segmentId, []);
+
+      expect(result).toEqual({});
+    });
+
+    it('should return price list with seat prices for each passenger', () => {
+      const passengers: readonly SeatPassengerWithDetail[] = [
+        {
+          passengerIndex: '0',
+          type: PassengerTypes.Adult,
+          seatAssignments: [],
+          seatMapDetails: [
+            {
+              segmentId: 0,
+              seatDisplayPrices: {
+                '1A': { number: '50' },
+                '1B': { number: '30' },
+              },
+              seatCurrency: 'EUR',
+              seatPrices: [],
+              status: '',
+              markUp: { number: '0' },
+              currency: 'EUR',
+            },
+          ],
+        },
+        {
+          passengerIndex: '1',
+          type: PassengerTypes.Child,
+          seatAssignments: [],
+          seatMapDetails: [
+            {
+              segmentId: 0,
+              seatDisplayPrices: {
+                '1A': { number: '25' },
+                '1B': { number: '15' },
+              },
+              seatCurrency: 'EUR',
+              seatPrices: [],
+              status: '',
+              markUp: { number: '0' },
+              currency: 'EUR',
+            },
+          ],
+        },
+      ];
+
+      const result = seatPriceMapTransform.toEntity(seatKey, segmentId, passengers);
+
+      expect(result).toEqual({
+        0: 50,
+        1: 25,
+      });
+    });
+
+    it('should return undefined for passenger when seat key is not found', () => {
+      const passengers: readonly SeatPassengerWithDetail[] = [
+        {
+          passengerIndex: '0',
+          type: PassengerTypes.Adult,
+          seatAssignments: [],
+          seatMapDetails: [
+            {
+              segmentId: 0,
+              seatDisplayPrices: {
+                '2A': { number: '50' },
+              },
+              seatCurrency: 'EUR',
+              seatPrices: [],
+              status: '',
+              markUp: { number: '0' },
+              currency: 'EUR',
+            },
+          ],
+        },
+      ];
+
+      const result = seatPriceMapTransform.toEntity(seatKey, segmentId, passengers);
+
+      expect(result).toEqual({
+        0: undefined,
+      });
+    });
+
+    it('should return undefined for passenger when segment is not found', () => {
+      const passengers: readonly SeatPassengerWithDetail[] = [
+        {
+          passengerIndex: '0',
+          type: PassengerTypes.Adult,
+          seatAssignments: [],
+          seatMapDetails: [
+            {
+              segmentId: 1,
+              seatDisplayPrices: {
+                '1A': { number: '50' },
+              },
+              seatCurrency: 'EUR',
+              seatPrices: [],
+              status: '',
+              markUp: { number: '0' },
+              currency: 'EUR',
+            },
+          ],
+        },
+      ];
+
+      const result = seatPriceMapTransform.toEntity(seatKey, segmentId, passengers);
+
+      expect(result).toEqual({
+        0: undefined,
+      });
+    });
+
+    it('should return undefined for passenger when seatMapDetails is empty', () => {
+      const passengers: readonly SeatPassengerWithDetail[] = [
+        {
+          passengerIndex: '0',
+          type: PassengerTypes.Adult,
+          seatAssignments: [],
+          seatMapDetails: [],
+        },
+      ];
+
+      const result = seatPriceMapTransform.toEntity(seatKey, segmentId, passengers);
+
+      expect(result).toEqual({
+        0: undefined,
+      });
+    });
+
+    it('should handle multiple passengers with mixed availability', () => {
+      const passengers: readonly SeatPassengerWithDetail[] = [
+        {
+          passengerIndex: '0',
+          type: PassengerTypes.Adult,
+          seatAssignments: [],
+          seatMapDetails: [
+            {
+              segmentId: 0,
+              seatDisplayPrices: {
+                '1A': { number: '50' },
+              },
+              seatCurrency: 'EUR',
+              seatPrices: [],
+              status: '',
+              markUp: { number: '0' },
+              currency: 'EUR',
+            },
+          ],
+        },
+        {
+          passengerIndex: '1',
+          type: PassengerTypes.Child,
+          seatAssignments: [],
+          seatMapDetails: [],
+        },
+        {
+          passengerIndex: '2',
+          type: PassengerTypes.Infant,
+          seatAssignments: [],
+          seatMapDetails: [
+            {
+              segmentId: 1,
+              seatDisplayPrices: {
+                '1A': { number: '10' },
+              },
+              seatCurrency: 'EUR',
+              seatPrices: [],
+              status: '',
+              markUp: { number: '0' },
+              currency: 'EUR',
+            },
+          ],
+        },
+      ];
+
+      const result = seatPriceMapTransform.toEntity(seatKey, segmentId, passengers);
+
+      expect(result).toEqual({
+        0: 50,
+        1: undefined,
+        2: undefined,
+      });
+    });
+  });
+});

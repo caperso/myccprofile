@@ -1,0 +1,40 @@
+import { Passenger as AccountPassenger } from '~app/domain/account/passengers/types/passenger.type';
+import { PassengerTypes } from '~app/domain/kernel/passengers/types/passengerType.type';
+import {
+  pnr1Fixture,
+  pnrId1Fixture,
+} from '~app/domain/ancillary/postSale/transforms/__fixtures__/pnr.fixture';
+import { Passenger } from '~app/domain/ancillary/postSale/types/passenger.type';
+import { SeatAssignmentStatus } from '../constants';
+
+export const accountPassengerChildFixture: AccountPassenger = {
+  dateOfBirth: 'mockedDob',
+  firstName: 'C',
+  id: 'mocked-child-passenger-index',
+  passengerReference: 'mocked-child-passenger-reference',
+  luggage: [{ quantity: 1, weight: 23, totalWeight: 23 }],
+  seatAssignments: [{ seat: '2A', segmentId: 1 }],
+  lastName: 'D',
+  name: 'C D',
+  passengerType: PassengerTypes.Child,
+  baggage: [],
+};
+
+export const passengerChildFixture: Passenger = {
+  dateOfBirth: 'mockedDob',
+  firstName: 'C',
+  passengerIndex: 'mocked-child-passenger-index',
+  lastName: 'D',
+  name: 'C D',
+  baggage: [{ quantity: 1, weight: 23, totalWeight: 23, pnr: pnr1Fixture, pnrId: pnrId1Fixture }],
+  passengerType: PassengerTypes.Child,
+  seat: [
+    {
+      seatKey: '2A',
+      status: SeatAssignmentStatus.PURCHASED,
+      segmentId: 1,
+      pnrId: pnrId1Fixture,
+    },
+  ],
+  passengerReference: 'mocked-child-passenger-reference',
+};

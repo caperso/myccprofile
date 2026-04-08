@@ -1,0 +1,179 @@
+import { SeatCharacteristicsAPI } from '~app/domain/ancillary/seatMap/schemas/seatCharacteristics.api.type';
+import { SeatSupplierAPITypes } from '~app/domain/kernel/seatMap/schemas/seatSupplier.api.type';
+import {
+  DeckAPI,
+  SeatMapAPI,
+  PassengerAPI,
+  ShopSeatResponse,
+} from '~app/domain/ancillary/postSale/types/seat.type';
+import {
+  DeckTypes,
+  SeatAssignmentStatus,
+  SeatPositionTypes,
+} from '~app/domain/ancillary/postSale/constants';
+import { passengerIndexFixture1 } from '~app/domain/ancillary/postSale/transforms/__fixtures__/seatPassengers.fixture';
+
+const seatKey = '6C';
+
+// eslint-disable-next-line functional/prefer-readonly-type
+const seatMapPassengersAPIFixture: PassengerAPI[] = [
+  {
+    passengerIndex: passengerIndexFixture1,
+    id: 1,
+    seatAssignments: [
+      {
+        seat: seatKey,
+        segmentId: 1,
+        segmentIdentifier: 'SEG-001',
+        status: SeatAssignmentStatus.IN_SHOPPING,
+        token: '1',
+      },
+    ],
+    seatMapDetails: [
+      {
+        currency: 'currency',
+        seatCurrency: 'seatCurrency',
+        seatPrices: [
+          {
+            key: 'key',
+            value: { number: '6' },
+          },
+        ],
+        seatDisplayPrices: {
+          [seatKey]: 6,
+        },
+        mandatoryFee: {
+          [seatKey]: 6,
+        },
+        segmentId: 1,
+        segmentIdentifier: 'SEG-001',
+        status: 'status',
+        markUp: 6,
+      },
+    ],
+    type: 'PASSENGER_TYPE_ADULT',
+    seatPreference: 'seatPreference',
+    frequentFlyers: [
+      {
+        airlineCode: 'code',
+        number: '6',
+      },
+    ],
+  },
+];
+
+const markUpFixture = 5;
+
+// eslint-disable-next-line functional/prefer-readonly-type
+const seatMapDecks: DeckAPI[] = [
+  {
+    compartments: [
+      {
+        rows: [
+          {
+            characteristics: [SeatCharacteristicsAPI.EconomyComfortSeat],
+            columns: ['C'],
+            number: 1,
+            seats: [
+              {
+                characteristics: [SeatCharacteristicsAPI.EconomyComfortSeat],
+                column: 'C',
+                number: 1,
+                key: seatKey,
+                occupied: false,
+                selectable: true,
+                uniqueId: 'uniqueId_1',
+                eligiblePassengerIds: [],
+                supplierIdentifier: '',
+              },
+            ],
+          },
+        ],
+        deckType: DeckTypes.Main,
+        seatPositions: {
+          C: SeatPositionTypes.Window,
+        },
+      },
+    ],
+    seatRangeStart: 1,
+    seatRangeEnd: 1,
+    type: DeckTypes.Main,
+    seatCharacteristics: [SeatCharacteristicsAPI.RestrictedToLongHaul],
+  },
+];
+
+// eslint-disable-next-line functional/prefer-readonly-type
+const seatMapsFixture: SeatMapAPI[] = [
+  {
+    decks: seatMapDecks,
+    segmentId: 1,
+    validatingCarrier: 'validatingCarrier',
+    segmentIdentifier: '',
+  },
+];
+
+const seatProductAPIFixture: ShopSeatResponse = {
+  seatMaps: seatMapsFixture,
+  passengers: seatMapPassengersAPIFixture,
+  segments: [
+    {
+      id: 1,
+      legID: 1,
+      departureAirport: {
+        code: 'departureCode',
+        countryCode: '',
+        cityCode: '',
+      },
+      arrivalAirport: {
+        code: 'arrivalCode',
+        countryCode: '',
+        cityCode: '',
+      },
+      departureDateTime: '',
+      arrivalDateTime: '',
+      flightNumber: '404',
+      marketingCarrier: {
+        Code: '',
+      },
+      operatingCarrier: {
+        Code: '',
+      },
+      validatingCarrier: {
+        Code: '',
+      },
+      cabinClass: 'CABIN_CLASS_TYPE_ECONOMY',
+      bookingClass: '',
+      distance: 0,
+      numberOfStops: 0,
+      duration: '',
+      daysEarlier: 0,
+      daysLater: 0,
+      plane: '',
+      transferInfo: {
+        WaitDuration: '',
+        TransferType: 0,
+      },
+      technicalStop: {
+        Duration: '',
+        DepartureDateTime: '',
+        ArrivalDateTime: '',
+        Airport: {
+          code: '',
+          countryCode: '',
+          cityCode: '',
+        },
+        DurationBefore: '',
+        DurationAfter: '',
+      },
+      flightPartID: 0,
+      pnrID: 0,
+      pnr: 0,
+      segmentIdentifier: '',
+    },
+  ],
+  markUp: markUpFixture,
+  seatSupplier: SeatSupplierAPITypes.Gordian,
+  adultBindingInfantPassengerIds: [1],
+};
+
+export const getAvailableSeatProductsResponse: ShopSeatResponse = seatProductAPIFixture;

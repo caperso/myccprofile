@@ -1,0 +1,170 @@
+import { changeSeat } from '../changeSeat.request';
+import { countMetricRecorder } from '~app/infrastructure/metrics';
+import { soaClientInstance } from '~app/infrastructure/soa/soaClientInstances';
+import {
+  AncillaryUpdateOperationType,
+  AncillaryProductType,
+} from '~app/domain/ancillary/constants';
+
+jest.mock('~app/infrastructure/soa/soaClientInstances', () => ({
+  soaClientInstance: {
+    request: jest.fn(),
+  },
+}));
+
+jest.mock('~app/infrastructure/metrics', () => ({
+  countMetricRecorder: jest.fn(),
+  MetricsEventTypes: {
+    PostSaleSeatSubmission: 'PostSaleSeatSubmission',
+  },
+  MetricsLabels: {
+    RequestStatus: 'RequestStatus',
+  },
+  MetricsRequestStatus: {
+    Success: 'Success',
+    Fail: 'Fail',
+  },
+}));
+
+const mockSoaRequest = soaClientInstance.request as jest.Mock;
+
+describe('changeSeat.request', () => {
+  const requestBody = {
+    operationType: AncillaryUpdateOperationType.Add,
+    productType: AncillaryProductType.SEAT,
+    orderNumber: 'TEST-12345',
+    shoppingCartId: 'shoppingCartId123',
+    extended: {
+      selectedSeat: {
+        passengers: [
+          {
+            id: 1,
+            seatAssignments: [
+              {
+                segmentId: 1,
+                segmentIdentifier: 'SEG-001',
+                seat: '12A',
+              },
+            ],
+          },
+        ],
+      },
+    },
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should submit payload and return true when business status is successful', async () => {
+    const mockedResponse = {
+      businessStatus: {
+        success: true,
+      },
+    };
+    mockSoaRequest.mockResolvedValue(mockedResponse);
+
+    const result = await changeSeat(requestBody);
+
+    expect(result).toBe(true);
+    expect(mockSoaRequest).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.any(String),
+      expect.objectContaining({
+        requestHeader: expect.any(Object),
+        requestBody,
+      }),
+      expect.objectContaining({
+        routetemplate: expect.any(String),
+      }),
+    );
+    expect(countMetricRecorder).toHaveBeenCalledWith([
+      {
+        name: 'PostSaleSeatSubmission',
+        labels: {
+          RequestStatus: 'Success',
+        },
+      },
+    ]);
+  });
+
+  it('should throw error when business status is not successful', async () => {
+    const mockedResponse = {
+      businessStatus: {
+        success: false,
+      },
+    };
+    mockSoaRequest.mockResolvedValue(mockedResponse);
+
+    await expect(changeSeat(requestBody)).rejects.toThrow(
+      'Seat change business status NOT OK, Change failed',
+    );
+    expect(countMetricRecorder).toHaveBeenCalledWith([
+      {
+        name: 'PostSaleSeatSubmission',
+        labels: {
+          RequestStatus: 'Fail',
+        },
+      },
+    ]);
+  });
+
+  it('should throw error when business status is undefined', async () => {
+    const mockedResponse = {
+      businessStatus: undefined,
+    };
+    mockSoaRequest.mockResolvedValue(mockedResponse);
+
+    await expect(changeSeat(requestBody)).rejects.toThrow(
+      'Seat change business status NOT OK, Change failed',
+    );
+    expect(countMetricRecorder).toHaveBeenCalledWith([
+      {
+        name: 'PostSaleSeatSubmission',
+        labels: {
+          RequestStatus: 'Fail',
+        },
+      },
+    ]);
+  });
+
+  it('should throw error when business status success is null', async () => {
+    const mockedResponse = {
+      businessStatus: {
+        success: null,
+      },
+    };
+    mockSoaRequest.mockResolvedValue(mockedResponse);
+
+    await expect(changeSeat(requestBody)).rejects.toThrow(
+      'Seat change business status NOT OK, Change failed',
+    );
+    expect(countMetricRecorder).toHaveBeenCalledWith([
+      {
+        name: 'PostSaleSeatSubmission',
+        labels: {
+          RequestStatus: 'Fail',
+        },
+      },
+    ]);
+  });
+
+  it('should throw error when business status has no success property', async () => {
+    const mockedResponse = {
+      businessStatus: {},
+    };
+    mockSoaRequest.mockResolvedValue(mockedResponse);
+
+    await expect(changeSeat(requestBody)).rejects.toThrow(
+      'Seat change business status NOT OK, Change failed',
+    );
+    expect(countMetricRecorder).toHaveBeenCalledWith([
+      {
+        name: 'PostSaleSeatSubmission',
+        labels: {
+          RequestStatus: 'Fail',
+        },
+      },
+    ]);
+  });
+});

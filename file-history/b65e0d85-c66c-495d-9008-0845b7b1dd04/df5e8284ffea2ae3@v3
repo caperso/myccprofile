@@ -1,0 +1,25 @@
+import { SeatPassengerWithDetail, SeatPriceMap } from '../types/seat.type';
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type SeatMapDetailWithSegmentIdentifier = { segmentIdentifier?: string } & any;
+
+export const seatPriceMapTransform = {
+  toEntity(
+    seatKey: string,
+    segmentIdentifier: string,
+    passengers: readonly SeatPassengerWithDetail[],
+  ): SeatPriceMap {
+    return passengers.reduce((acc, pax) => {
+      const priceDetailsPassenger = (
+        pax.seatMapDetails as readonly SeatMapDetailWithSegmentIdentifier[]
+      ).find((item) => item.segmentIdentifier === segmentIdentifier);
+
+      const seatPrice = priceDetailsPassenger?.seatDisplayPrices[seatKey]?.number;
+      const currentPaxSeatPrice: SeatPriceMap = {
+        [pax.passengerIndex]: seatPrice ? Number(seatPrice) : undefined,
+      };
+
+      return { ...acc, ...currentPaxSeatPrice };
+    }, {});
+  },
+};

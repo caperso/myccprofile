@@ -1,0 +1,15 @@
+import { SeatMapDetail__Output as SeatMapDetail } from '@xivart/proto-postsale/types/travix/postsale/producthub/seathub/v1/SeatMapDetail';
+
+import { SeatMapDetail as SeatMapDetailAPI } from '../../contract/shop.type';
+import { priceObjectTransform } from './priceObject.transform';
+
+export const seatMapDetailsTransform = {
+  toEntity: (seatMapDetailsApi: readonly SeatMapDetailAPI[]): readonly SeatMapDetail[] =>
+    seatMapDetailsApi.map((detail) => ({
+      ...detail,
+      seatDisplayPrices: priceObjectTransform.toEntity(detail.seatDisplayPrices),
+      markUp: {
+        number: String(detail.markUp),
+      },
+    })),
+};

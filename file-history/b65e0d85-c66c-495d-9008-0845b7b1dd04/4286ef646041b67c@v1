@@ -1,0 +1,80 @@
+import { PassengerTypes } from '~app/domain/kernel/passengers/types/passengerType.type';
+import { PassengerAPI, SeatPassengerWithDetail } from '../../types/seat.type';
+
+const frequentFlyersFixture = { airlineCode: 'frequentFlyers', number: '1' };
+
+export const passengerIndexFixture1 = 'passengerIndex1';
+export const passengerIndexFixture2 = 'passengerIndex2';
+const passengerIndexFixture3 = 'passengerIndex3';
+
+export const seatPassengersApiFixture: readonly PassengerAPI[] = [
+  {
+    passengerIndex: passengerIndexFixture1,
+    seatAssignments: [],
+    seatMapDetails: [],
+    type: PassengerTypes.Adult,
+    frequentFlyers: [frequentFlyersFixture],
+    seatPreference: '',
+    id: 1,
+  },
+];
+
+const seatPassengerAdultWithPricesFixture = {
+  passengerIndex: passengerIndexFixture1,
+  seatAssignments: [],
+  seatMapDetails: [
+    {
+      seatDisplayPrices: {
+        key: { number: '16' },
+      },
+      seatCurrency: 'EUR',
+      seatPrices: [{ key: 'key', value: { number: '16' } }],
+      status: '',
+      markUp: { number: '5' },
+      currency: 'EUR',
+      segmentId: 1,
+    },
+  ],
+  type: PassengerTypes.Adult,
+};
+
+const seatPassengerChildWithPricesFixture = {
+  passengerIndex: passengerIndexFixture2,
+  seatAssignments: [],
+  seatMapDetails: [
+    {
+      seatDisplayPrices: {
+        key: { number: '10' },
+      },
+      seatCurrency: 'EUR',
+      seatPrices: [{ key: 'key', value: { number: '10' } }],
+      status: '',
+      markUp: { number: '5' },
+      currency: 'EUR',
+      segmentId: 1,
+    },
+  ],
+  type: PassengerTypes.Child,
+};
+
+const seatPassengerInfantWithPricesFixture = {
+  passengerIndex: passengerIndexFixture3,
+  seatAssignments: [],
+  seatMapDetails: [],
+  type: PassengerTypes.Infant,
+};
+
+export const seatPassengersWithPricesFixture: readonly SeatPassengerWithDetail[] = [
+  seatPassengerAdultWithPricesFixture,
+  seatPassengerChildWithPricesFixture,
+  seatPassengerInfantWithPricesFixture,
+];
+
+export const seatPassengersWithDetailsFixture: readonly SeatPassengerWithDetail[] = [
+  {
+    passengerIndex: passengerIndexFixture1,
+    seatAssignments: [],
+    seatMapDetails: [],
+    type: PassengerTypes.Adult,
+  },
+];

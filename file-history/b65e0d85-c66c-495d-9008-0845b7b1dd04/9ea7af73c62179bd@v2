@@ -1,0 +1,31 @@
+import { DeckAPI, SeatPassengerWithDetail } from '../types/seat.type';
+import { DeckTypes } from '../constants';
+import { Deck, DeckType } from '../types/deck.type';
+import { seatRowTransform } from './seatRow.transform';
+
+const deckTypeMap: { readonly [key: string]: DeckType } = {
+  [DeckTypes.Main]: DeckTypes.Main,
+  [DeckTypes.Upper]: DeckTypes.Upper,
+};
+
+export const decksTransform = {
+  toEntity: (
+    decks: readonly DeckAPI[],
+    passengers: readonly SeatPassengerWithDetail[],
+    segmentIdentifier: string,
+  ): readonly Deck[] =>
+    decks.reduce<readonly Deck[]>((acc, { seatRangeStart, type, compartments }) => {
+      const rows = seatRowTransform.toEntity(compartments, passengers, segmentIdentifier);
+      if (!rows) {
+        return acc;
+      }
+
+      const deck: Deck = {
+        rows,
+        seatRangeStart,
+        type: deckTypeMap[type],
+      };
+
+      return acc.concat(deck);
+    }, []),
+};

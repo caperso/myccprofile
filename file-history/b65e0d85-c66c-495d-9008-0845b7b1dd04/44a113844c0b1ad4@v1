@@ -1,0 +1,70 @@
+import { SeatCharacteristicsAPI } from '~app/domain/ancillary/seatMap/schemas/seatCharacteristics.api.type';
+import { RowAPI, SeatPositionType, Seat, SeatPassengerWithDetail } from '../types/seat.type';
+import { isCharacteristicPresent } from '../helpers/isCharacteristicPresent';
+import { seatTypeTransform } from './seatType.transform';
+import { unsuitablePassengerTypesTransform } from './unsuitablePassengerTypes.transform';
+import { SeatPositionsAPI } from '~app/domain/ancillary/seatMap/schemas/seatPositions.api.type';
+import { SeatPositionTypes, SeatTypes } from '../constants';
+import { groupFacilities } from '../helpers/groupFacilities';
+import { seatPriceMapTransform } from './seatPriceMap.transform';
+
+const seatPositionsMap: { readonly [key: string]: SeatPositionType } = {
+  [SeatPositionTypes.Aisle]: SeatPositionTypes.Aisle,
+  [SeatPositionTypes.Center]: SeatPositionTypes.Center,
+  [SeatPositionTypes.Window]: SeatPositionTypes.Window,
+};
+
+export const seatTransform = {
+  toEntity: (
+    passengers: readonly SeatPassengerWithDetail[],
+    row: RowAPI,
+    seatPositions: SeatPositionsAPI,
+    segmentId: number,
+  ): readonly Seat[] => {
+    const seats = row.columns.map((column, index) => {
+      const seat = row.seats.find((item) => item.column === column);
+      const seatPosition = seatPositionsMap[seatPositions[column]];
+
+      if (!seat) {
+        return {
+          hasBulkhead: false,
+          isFacility: false,
+          isSelectable: false,
+          seatKey: `${index}`,
+          seatPosition,
+          type: SeatTypes.Empty,
+        };
+      }
+
+      const { type, isFacility } = seatTypeTransform.toEntity(seat);
+      const { key: seatKey, occupied, selectable, characteristics } = seat;
+
+      const unsuitablePassengerTypes = unsuitablePassengerTypesTransform.toEntity(
+        passengers,
+        seat.characteristics,
+        row.characteristics,
+      );
+
+      const isSelectable = selectable && !occupied;
+
+      const seatPriceMap = isSelectable
+        ? seatPriceMapTransform.toEntity(seatKey, segmentId, passengers)
+        : {};
+
+      const seatPayload: Seat = {
+        hasBulkhead: isCharacteristicPresent(SeatCharacteristicsAPI.BulkheadSeat, characteristics),
+        isFacility,
+        isSelectable,
+        priceMap: seatPriceMap,
+        seatKey,
+        seatPosition,
+        type,
+        unsuitablePassengerTypes,
+      };
+
+      return seatPayload;
+    });
+
+    return groupFacilities(seats);
+  },
+};

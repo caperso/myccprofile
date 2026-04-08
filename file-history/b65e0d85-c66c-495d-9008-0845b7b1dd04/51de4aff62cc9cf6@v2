@@ -1,0 +1,49 @@
+import { seatTransform } from './seat.transform';
+import { SeatPassengerWithDetail } from '../types/seat.type';
+import { SeatCharacteristicsAPI } from '~app/domain/ancillary/seatMap/schemas/seatCharacteristics.api.type';
+import { isCharacteristicPresent } from '../helpers/isCharacteristicPresent';
+import { SeatPositionsAPI } from '~app/domain/ancillary/seatMap/schemas/seatPositions.api.type';
+import { SeatRow } from '../types/seatRow.type';
+import { Compartment } from '../../contract/shop.type';
+
+export const seatRowTransform = {
+  toEntity: (
+    compartments: readonly Compartment[],
+    passengers: readonly SeatPassengerWithDetail[],
+    segmentIdentifier: string,
+  ): readonly SeatRow[] | undefined => {
+    const result = compartments.reduce<readonly SeatRow[]>((acc, compartment, compartmentIndex) => {
+      const { rows } = compartment;
+      const seatPositionsApi = compartment.seatPositions as SeatPositionsAPI;
+
+      const seatPositions: SeatPositionsAPI = {};
+
+      Object.keys(seatPositionsApi).forEach((key) => {
+        Object.assign(seatPositions, { [key.toUpperCase()]: seatPositionsApi[key] });
+      });
+
+      return acc.concat(
+        rows.map((row, index) => {
+          const [hasExit, hasBulkhead, hasOverwing, hasStairs] = [
+            SeatCharacteristicsAPI.ExitRowSeat,
+            SeatCharacteristicsAPI.BulkheadSeat,
+            SeatCharacteristicsAPI.OverwingSeat,
+            SeatCharacteristicsAPI.NoSeatStairsToUpperDeck,
+          ].map((characteristics) => isCharacteristicPresent(characteristics, row.characteristics));
+
+          return {
+            hasBulkhead,
+            hasExit,
+            hasOverwing,
+            hasStairs,
+            key: `${compartmentIndex}-${index}`,
+            number: row.number,
+            seats: seatTransform.toEntity(passengers, row, seatPositions, segmentIdentifier),
+          };
+        }),
+      );
+    }, []);
+
+    return result.length ? result : undefined;
+  },
+};

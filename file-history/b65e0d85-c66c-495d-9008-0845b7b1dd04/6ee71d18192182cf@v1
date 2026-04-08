@@ -1,0 +1,59 @@
+import { decksApiFixture } from '../__fixtures__/decks.fixture';
+import { seatRowTransform } from '../seatRow.transform';
+import { seatPassengersWithDetailsFixture } from '../__fixtures__/seatPassengers.fixture';
+import { DeckTypes } from '../../constants';
+import { decksTransform } from '../decks.transform';
+
+describe('deckTransform', () => {
+  describe('toEntity', () => {
+    (seatRowTransform.toEntity as jest.Mock) = jest.fn(() => ['row']);
+
+    const [{ seatRangeStart }] = decksApiFixture;
+    const segmentId = 1;
+
+    it('should transform data and call required transforms', () => {
+      const result = decksTransform.toEntity(
+        decksApiFixture,
+        seatPassengersWithDetailsFixture,
+        segmentId,
+      );
+
+      expect(seatRowTransform.toEntity).toHaveBeenCalledWith(
+        decksApiFixture[0].compartments,
+        seatPassengersWithDetailsFixture,
+        segmentId,
+      );
+      expect(result).toStrictEqual([
+        {
+          rows: ['row'],
+          seatRangeStart,
+          type: DeckTypes.Main,
+        },
+      ]);
+    });
+
+    it('should filter decks by transformed rows value', () => {
+      (seatRowTransform.toEntity as jest.Mock).mockImplementationOnce(() => undefined);
+
+      const result = decksTransform.toEntity(
+        decksApiFixture.concat(decksApiFixture),
+        seatPassengersWithDetailsFixture,
+        segmentId,
+      );
+
+      expect(result).toStrictEqual([
+        {
+          rows: ['row'],
+          seatRangeStart,
+          type: DeckTypes.Main,
+        },
+      ]);
+    });
+
+    it('should return [] if no decks were transformed', () => {
+      const result = decksTransform.toEntity([], seatPassengersWithDetailsFixture, 1);
+
+      expect(result).toStrictEqual([]);
+    });
+  });
+});

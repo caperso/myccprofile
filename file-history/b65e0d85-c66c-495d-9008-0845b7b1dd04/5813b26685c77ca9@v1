@@ -1,0 +1,1115 @@
+import { TravixDecimal__Output as TravixDecimal } from '@xivart/proto-postsale/types/travix/postsale/common/v1/TravixDecimal';
+
+import { SeatAssignmentStatus } from '../postSale/constants';
+import {
+  AckCodeType,
+  ErrorClassificationCodeType,
+  OfferLocationEnum,
+  SeverityCodeType,
+} from './shop.constants';
+import { SeatCharacteristicsAPI } from '../seatMap/schemas/seatCharacteristics.api.type';
+
+export interface ShopAsyncRequestType {
+  /**
+   * 请求头信息
+   */
+  readonly requestHeader: RequestHeader;
+  /**
+   * 请求体信息
+   */
+  readonly requestBody: ShopRequestBody;
+}
+export interface ShopAsyncResponseType {
+  /**
+   * 响应状态, 首先对ACK信息处理，若为Success,则相应成功。若为Failure,查看error
+   * s参考更详细的错误码和错误信息
+   */
+  readonly responseStatus: ResponseStatusType;
+  /**
+   * 响应头信息
+   */
+  readonly responseHeader: ResponseHeader;
+  /**
+   * 响应数据
+   */
+  readonly responseBody: ShopResponseBody;
+  /**
+   * 业务状态信息
+   */
+  readonly businessStatus: BusinessStatus;
+}
+export interface BusinessStatus {
+  /**
+   * 是否成功
+   */
+  readonly success: boolean;
+  /**
+   * 错误信息
+   */
+  readonly error: Error;
+}
+export interface Error {
+  /**
+   * 错误码
+   */
+  readonly errorCode: string;
+  /**
+   * 错误信息
+   */
+  readonly errorMessage: string;
+}
+export interface ShopResponseBody {
+  /**
+   * Airhelp产品
+   */
+  readonly airhelp: ShopAirhelpResponse;
+  /**
+   * checkin产品
+   */
+  readonly autoCheckIn: ShopAutoCheckInResponse;
+  /**
+   * seat产品
+   */
+  readonly seat: ShopSeatResponse;
+  /**
+   * Fee产品
+   */
+  readonly fee: ShopFeeResponse;
+  /**
+   * SP产品
+   */
+  readonly servicePackage: ShopServicePackageResponse;
+  /**
+   * 供应商Hepstar，Ins产品
+   */
+  readonly insurance: ShopInsuranceResponse;
+  /**
+   * 供应商Hepstar，RP产品
+   */
+  readonly refundProtect: ShopRefundProtectResponse;
+  /**
+   * 行李产品
+   */
+  readonly baggage: ShopBaggageResponse;
+  /**
+   * Ftg产品
+   */
+  readonly ticketGuarantee: ShopFtgResponse;
+  /**
+   * cfar产品
+   */
+  readonly cfar: ShopCfarResponse;
+}
+export interface ShopCfarResponse {
+  /**
+   * ID
+   */
+  readonly id: string;
+  /**
+   * 可售方案列表
+   */
+  readonly purchaseOptions: readonly OfferPurchaseOption[];
+  /**
+   * USP文案
+   */
+  readonly translatedContent: OfferTranslatedContent;
+}
+export interface OfferTranslatedContent {
+  readonly usps: readonly UspItem[];
+}
+export interface UspItem {
+  readonly text: string;
+}
+export interface OfferPurchaseOption {
+  readonly id: string;
+  /**
+   * 产品费率信息
+   */
+  readonly rate: BasicRate;
+  readonly coveragePercentage: string;
+}
+export interface BasicRate {
+  /**
+   * 产品总价
+   */
+  readonly price: Price;
+  /**
+   * 每人价格
+   */
+  readonly pricePerPerson: Price;
+}
+export interface Price {
+  /**
+   * 金额
+   */
+  readonly amount: number;
+  /**
+   * 币种
+   */
+  readonly currency: string;
+}
+export interface ShopFtgResponse {
+  readonly id: string;
+  /**
+   * 是否已选中（可为空）
+   */
+  readonly selected: boolean;
+  /**
+   * 用户是否主动选择（可为空）
+   */
+  readonly userSelection: boolean;
+  /**
+   * 费用明细列表
+   */
+  readonly costs: readonly BasicRate[];
+  /**
+   * 是否展示提醒
+   */
+  readonly showReminder: boolean;
+}
+export interface ShopBaggageResponse {
+  readonly legs: readonly any[]; // Legs在account这边没有用 但是契约里有所以给个占位符
+  readonly items: readonly BaggageOptionsModel[];
+}
+
+export interface BaggageOptionsModel {
+  readonly passengerId: number;
+  readonly passengerType: string;
+  readonly checkedBaggageOptions: readonly BaggageOptionModel[];
+  readonly cabinBaggageOptions: readonly BaggageOptionModel[];
+  readonly personalItemOptions: readonly BaggageOptionModel[];
+}
+
+export interface BaggageOptionModel {
+  readonly legsIds: readonly number[];
+  readonly pnr: string;
+  readonly pnrId: number;
+  readonly needSelfTransfer: boolean;
+  readonly transferTimeTooShort: boolean;
+  readonly defaultBaggage: DefaultBaggage;
+  readonly selectedBaggage: SelectedBaggage;
+  readonly items: readonly BaggageOptionItem[];
+  readonly baggageDetails: readonly BaggageDetailItem[];
+}
+
+export interface BaggageDetailItem {
+  readonly segmentId: number;
+  readonly status: number;
+  readonly weight: number;
+  readonly pieces: number;
+  readonly unit: string;
+  readonly code: string;
+  readonly cost: BaggageOptionCost;
+  readonly baggageRestriction: BaggageRestriction;
+}
+
+export interface BaggageRestriction {
+  readonly sumOfDimensions: number;
+  readonly length: number;
+  readonly width: number;
+  readonly height: number;
+  readonly unit: string;
+  readonly type: string;
+}
+
+export interface BaggageOptionCost {
+  readonly currencyCode: string;
+  readonly amountTotal: string;
+  readonly amountTotalPerOneWay: string;
+  readonly amount: string;
+  readonly amountPerOneWay: string;
+  readonly markup: string;
+  readonly markupPerOneWay: string;
+  readonly additionalCosts: string;
+  readonly additionalCostsPerOneWay: string;
+  readonly originalAmount: string;
+  readonly discountAmount: string;
+}
+
+export interface BaggageOptionItem {
+  readonly code: string;
+  readonly pieces: number;
+  readonly weight: number;
+  readonly pbrEventName: string;
+  readonly provider: string;
+  readonly cost: BaggageOptionCost;
+  readonly bundleOfferType: string;
+  readonly specificBundleCode: string;
+  readonly baggageRestriction: BaggageRestriction;
+}
+
+export interface SelectedBaggage {
+  readonly code: string;
+  readonly bundleCode: string;
+}
+
+export interface DefaultBaggage {
+  readonly included: boolean;
+  readonly quantity: number;
+  readonly weight: number;
+  readonly unit: string;
+  readonly amount: string;
+  readonly status: number;
+  readonly baggageRestriction: BaggageRestriction;
+}
+
+export interface ShopRefundProtectResponse {
+  readonly refundProtects: readonly RefundProtect[];
+  readonly selectedPaidProduct: boolean;
+}
+export interface RefundProtect {
+  readonly id: string;
+  readonly name: string;
+  readonly nameV2: string;
+  readonly productKey: string;
+  readonly currency: string;
+  readonly packageQuotes: readonly RefundProtectPackageQuote[];
+  readonly providerName: string;
+  readonly providerCode: string;
+  readonly basePrice: number;
+  readonly tax: number;
+  readonly disclosureV2: string;
+}
+export interface RefundProtectPackageQuote {
+  readonly type: string;
+  readonly category: string;
+  readonly description: string;
+  readonly policyCost: number;
+  readonly priceWithServiceCost: number;
+  readonly purchasePricePerPerson: number;
+  readonly items: readonly string[];
+  readonly policyWordingUrl: string;
+  readonly optionText: string;
+  readonly noInsuranceText: string;
+  readonly insurer: Insurer;
+  readonly productCovers: readonly ProductCover[];
+  readonly highlight: Highlight;
+  readonly termsAndConditionsLink: string;
+}
+export interface Highlight {
+  readonly text: string;
+  readonly highlightProduct: boolean;
+}
+export interface ProductCover {
+  readonly header: string;
+  readonly items: readonly Item[];
+}
+export interface Item {
+  readonly description: string;
+  readonly currency: string;
+  readonly amount: string;
+}
+export interface Insurer {
+  readonly name: string;
+  readonly logoURL: string;
+  readonly code: string;
+  readonly phone: string;
+  readonly email: string;
+  readonly address: string;
+  readonly province: string;
+  readonly city: string;
+  readonly country: string;
+  readonly postalCode: string;
+}
+export interface ShopInsuranceResponse {
+  readonly insurances: readonly Insurance[];
+  readonly selectedPaidProduct: boolean;
+}
+export interface Insurance {
+  readonly id: string;
+  readonly name: string;
+  readonly nameV2: string;
+  readonly productKey: string;
+  readonly packageQuotes: readonly InsurancePackageQuote[];
+  readonly providerCode: string;
+  readonly basePrice: number;
+  readonly policyCost: number;
+  readonly tax: number;
+}
+export interface InsurancePackageQuote {
+  readonly type: string;
+  readonly policyCost: number;
+  readonly priceWithServiceCost: number;
+  readonly purchasePricePerPerson: number;
+  readonly items: readonly string[];
+  readonly excludedItems: readonly string[];
+  readonly policyWordingUrl: string;
+  readonly precontract: string;
+  readonly benefitsLink: string;
+  readonly ipid: string;
+  readonly minimalDisclosure: readonly string[];
+  readonly topLegalStatement: string;
+  readonly bottomLegalStatement: string;
+  readonly marketingMessage: string;
+  readonly optionText: string;
+  readonly noInsuranceText: string;
+  readonly insurer: Insurer;
+  readonly productCovers: readonly ProductCover[];
+  readonly highlight: Highlight;
+  readonly descriptionBelowTitle: string;
+  readonly nationalId: NationalId;
+  readonly visualComponents: readonly VisualComponent[];
+  readonly pretick: Pretick;
+  readonly footNote: string;
+  readonly excludedDescription: string;
+  readonly description: string;
+}
+export interface Pretick {
+  readonly product: boolean;
+  readonly tickbox: boolean;
+}
+export interface VisualComponent {
+  readonly type: string;
+  readonly order: number;
+  readonly enabled: boolean;
+  readonly selected: boolean;
+  readonly key: string;
+  readonly text: string;
+  readonly items: readonly string[];
+  readonly options: readonly VisualComponentOption[];
+}
+export interface VisualComponentOption {
+  readonly key: string;
+  readonly text: string;
+  readonly isDefault: boolean;
+  readonly selected: boolean;
+}
+export interface NationalId {
+  readonly idRequired: boolean;
+  readonly idContent: string;
+  readonly idPlaceholder: string;
+}
+export interface ShopServicePackageResponse {
+  /**
+   * 服务包列表
+   */
+  readonly servicePackages: readonly ServicePackage[];
+  /**
+   * 倾向得分
+   */
+  readonly propensityScore: number;
+}
+export interface ServicePackage {
+  /**
+   * 产品ID
+   */
+  readonly id: string;
+  /**
+   * 顺序id
+   */
+  readonly orderId: string;
+  /**
+   * 是否预选
+   */
+  readonly preselected: boolean;
+  /**
+   * 是否高亮显示
+   */
+  readonly highlighted: boolean;
+  /**
+   * 服务包code
+   */
+  readonly code: string;
+  /**
+   * 显示名称
+   */
+  readonly displayName: string;
+  /**
+   * 独特卖点列表
+   */
+  readonly usps: readonly Usp[];
+  /**
+   * 价格信息
+   */
+  readonly priceInfo: PriceInfo;
+}
+export interface PriceInfo {
+  /**
+   * 单价
+   */
+  readonly pricePerPerson: number;
+  /**
+   * 总价
+   */
+  readonly totalPrice: number;
+  /**
+   * 税费
+   */
+  readonly tax: string;
+  /**
+   * 是否使用动态调价
+   */
+  readonly useDPOPricing: boolean;
+  readonly commission: string;
+  readonly dynamicProductPricing: DynamicProductPricing;
+}
+export interface DynamicProductPricing {
+  readonly propensityBucket: number;
+  readonly pricingStrategy: number;
+}
+export interface Usp {
+  /**
+   * usp类型code
+   */
+  readonly code: string;
+  /**
+   * 排序
+   */
+  readonly orderId: number;
+  readonly placeholder: Placeholder;
+  readonly labelKey: string;
+}
+export interface Placeholder {
+  /**
+   * 需求类型
+   */
+  readonly type: string;
+  /**
+   * 需求值
+   */
+  readonly value: string;
+}
+export interface ShopFeeResponse {
+  /**
+   * 产品ID
+   */
+  readonly id: string;
+  /**
+   * 货币
+   */
+  readonly currency: string;
+  /**
+   * 价格
+   */
+  readonly price: number;
+  /**
+   * 阈值
+   */
+  readonly threshold: number;
+}
+export interface ShopSeatResponse {
+  /**
+   * 座位图列表
+   */
+  readonly seatMaps: readonly SeatMap[];
+  /**
+   * 乘客列表
+   */
+  readonly passengers: readonly Passenger[];
+  /**
+   * 航段列表
+   */
+  readonly segments: readonly Segment[];
+  /**
+   * 加价金额
+   */
+  readonly markUp: number;
+  /**
+   * 座位供应商
+   */
+  readonly seatSupplier: string;
+  /**
+   * 成人绑定婴儿乘客ID列表
+   */
+  readonly adultBindingInfantPassengerIds: readonly number[];
+}
+export interface Carrier {
+  /**
+   * 航空公司二字码
+   */
+  readonly Code: string;
+}
+export interface Segment {
+  /**
+   * Segment的ID
+   */
+  readonly id: number;
+  readonly segmentIdentifier: string;
+  /**
+   * Leg的ID
+   */
+  readonly legID: number;
+  /**
+   * 出发机场
+   */
+  readonly departureAirport: Airport;
+  /**
+   * 到达机场
+   */
+  readonly arrivalAirport: Airport;
+  /**
+   * 起飞时间，格式yyyy-MM-dd HH:mm:ss
+   */
+  readonly departureDateTime: string;
+  /**
+   * 到达时间，格式yyyy-MM-dd HH:mm:ss
+   */
+  readonly arrivalDateTime: string;
+  /**
+   * 航班号
+   */
+  readonly flightNumber: string;
+  /**
+   * 销售航司信息
+   */
+  readonly marketingCarrier: Carrier;
+  /**
+   * 承运航司
+   */
+  readonly operatingCarrier: Carrier;
+  /**
+   * 出票航司信息
+   */
+  readonly validatingCarrier: Carrier;
+  /**
+   * 舱等
+   */
+  readonly cabinClass: string;
+  /**
+   * 舱位
+   */
+  readonly bookingClass: string;
+  /**
+   * 飞行距离，单位km
+   */
+  readonly distance: number;
+  /**
+   * 经停次数
+   */
+  readonly numberOfStops: number;
+  /**
+   * 飞行时长
+   */
+  readonly duration: string;
+  /**
+   * 航段跨天数（因时区导致的到达日期早于起飞日期）
+   */
+  readonly daysEarlier: number;
+  /**
+   * 航段跨天数
+   */
+  readonly daysLater: number;
+  /**
+   * 机型
+   */
+  readonly plane: string;
+  /**
+   * 换乘信息
+   */
+  readonly transferInfo: TransferInfo;
+  /**
+   * 技术性经停点信息
+   */
+  readonly technicalStop: TechnicalStop;
+  /**
+   * FlightPartID
+   */
+  readonly flightPartID: number;
+  /**
+   * 携程pnr
+   */
+  readonly pnrID: number;
+  /**
+   * 航司pnr
+   */
+  readonly pnr: number;
+}
+export interface TechnicalStop {
+  /**
+   * 经停时长
+   */
+  readonly Duration: string;
+  /**
+   * 起飞时间，格式yyyy-MM-dd HH:mm:ss
+   */
+  readonly DepartureDateTime: string;
+  /**
+   * 到达时间，格式yyyy-MM-dd HH:mm:ss
+   */
+  readonly ArrivalDateTime: string;
+  /**
+   * 经停机场信息
+   */
+  readonly Airport: Airport;
+  /**
+   * 技术性经停前的飞行时长
+   */
+  readonly DurationBefore: string;
+  /**
+   * 技术性经停后的飞行时长
+   */
+  readonly DurationAfter: string;
+}
+export interface TransferInfo {
+  /**
+   * 中转时长（两个航段之间的时间差）
+   */
+  readonly WaitDuration: string;
+  /**
+   * 中转类型
+   */
+  readonly TransferType: TransferType;
+}
+enum TransferType {
+  /**
+   * 2=VI中转，需要重新办理乘机手续
+   */
+  ProtectedSelfTransfer = 1,
+  /**
+   * 1=联程航班中转，无需重新办理乘机手续
+   */
+  Managed = 0,
+}
+export interface Airport {
+  /**
+   * 机场三字码
+   */
+  readonly code: string;
+  /**
+   * 国家二字码
+   */
+  readonly countryCode: string;
+  /**
+   * 城市三字码
+   */
+  readonly cityCode: string;
+}
+export interface Passenger {
+  /**
+   * 乘客ID
+   */
+  readonly id: number;
+  /**
+   * 乘客ID,用于补订
+   */
+  readonly passengerIndex: string;
+  /**
+   * 乘客类型
+   */
+  readonly type: string;
+  /**
+   * 常旅客信息列表
+   */
+  readonly frequentFlyers: readonly FrequentFlyer[];
+  /**
+   * 座位分配列表
+   */
+  readonly seatAssignments: readonly SeatAssignment[];
+  /**
+   * 座位图详情列表
+   */
+  readonly seatMapDetails: readonly SeatMapDetail[];
+  /**
+   * 座位偏好
+   */
+  readonly seatPreference: string;
+}
+export interface PriceObject {
+  readonly [key: string]: number;
+}
+export interface SeatMapDetail {
+  /**
+   * 货币代码
+   */
+  readonly currency: string;
+  /**
+   * 座位货币代码
+   */
+  readonly seatCurrency: string;
+  /**
+   * 座位价格列表
+   */
+  // eslint-disable-next-line functional/prefer-readonly-type
+  seatPrices: SeatPrice[];
+  /**
+   * 座位显示价格映射
+   */
+  readonly seatDisplayPrices: PriceObject;
+  /**
+   * 强制费用映射
+   */
+  readonly mandatoryFee: PriceObject;
+  /**
+   * 航段ID
+   */
+  readonly segmentId: number;
+  /**
+   * 状态
+   */
+  readonly status: string;
+  /**
+   * 加价金额
+   */
+  readonly markUp: number;
+}
+export interface SeatPrice {
+  /**
+   * 座位键
+   */
+  readonly key: string;
+  /**
+   * 价格值
+   */
+  readonly value: TravixDecimal;
+}
+export interface SeatAssignment {
+  // 私自加
+  readonly status: SeatAssignmentStatus;
+  /**
+   * 座位号
+   */
+  readonly seat: string;
+  /**
+   * segmentId
+   */
+  readonly segmentId: number;
+  /**
+   * 令牌
+   */
+  readonly token: string;
+}
+export interface FrequentFlyer {
+  /**
+   * 常旅客号码
+   */
+  readonly number: string;
+  /**
+   * 航空公司代码
+   */
+  readonly airlineCode: string;
+}
+export interface SeatMap {
+  /**
+   * 甲板列表
+   */
+  readonly decks: readonly Deck[];
+  /**
+   * 航段ID
+   */
+  readonly segmentId: number;
+  readonly segmentIdentifier: string;
+  /**
+   * 验证承运人
+   */
+  readonly validatingCarrier: string;
+}
+export interface Deck {
+  /**
+   * 舱室列表
+   */
+  readonly compartments: readonly Compartment[];
+  /**
+   * 座位范围开始
+   */
+  readonly seatRangeStart: number;
+  /**
+   * 座位范围结束
+   */
+  readonly seatRangeEnd: number;
+  /**
+   * 座位特征列表
+   */
+  readonly seatCharacteristics: readonly SeatCharacteristicsAPI[];
+  /**
+   * 甲板类型
+   */
+  readonly type: string;
+}
+export interface Compartment {
+  /**
+   * 甲板类型
+   */
+  readonly deckType: string;
+  /**
+   * 行列表
+   */
+  readonly rows: readonly Row[];
+  /**
+   * 座位位置映射
+   */
+  readonly seatPositions: { readonly [key: string]: string };
+}
+export interface Row {
+  /**
+   * 特征列表
+   */
+  readonly characteristics: readonly SeatCharacteristicsAPI[];
+  /**
+   * 列列表
+   */
+  readonly columns: readonly string[];
+  /**
+   * 行号
+   */
+  readonly number: number;
+  /**
+   * 座位列表
+   */
+  readonly seats: readonly Seat[];
+}
+export interface Seat {
+  /**
+   * 特征列表
+   */
+  readonly characteristics: readonly SeatCharacteristicsAPI[];
+  /**
+   * 列
+   */
+  readonly column: string;
+  /**
+   * 座位号
+   */
+  readonly number: number;
+  /**
+   * 是否被占用
+   */
+  readonly occupied: boolean;
+  /**
+   * 是否可选择
+   */
+  readonly selectable: boolean;
+  /**
+   * 符合条件的乘客ID列表
+   */
+  readonly eligiblePassengerIds: readonly number[];
+  /**
+   * 座位键
+   */
+  readonly key: string;
+  /**
+   * 唯一ID
+   */
+  readonly uniqueId: string;
+  /**
+   * 供应商标识符
+   */
+  readonly supplierIdentifier: string;
+}
+export interface ShopAutoCheckInResponse {
+  readonly autoCheckInDetail: AutoCheckInDetail;
+  readonly selected: boolean;
+  readonly supplier: string;
+}
+export interface AutoCheckInDetail {
+  readonly saleAmount: number;
+  readonly saleCurrency: string;
+  readonly checkInLegs: readonly AutoCheckInForLeg[];
+  readonly availableNumberOfPassengers: number;
+}
+export interface AutoCheckInForLeg {
+  readonly id: number;
+  readonly checkInAvailable: boolean;
+}
+export interface ShopAirhelpResponse {
+  /**
+   * Airhlep 产品列表
+   */
+  readonly fdcProducts: readonly AirhelpBasicProduct[];
+  /**
+   * 倾向性评分
+   */
+  readonly propensityScore: number;
+  readonly selectedPaidProduct: boolean;
+  readonly selectedLevelCode: string;
+}
+export interface AirhelpBasicProduct {
+  /**
+   * 产品ID
+   */
+  readonly id: string;
+  /**
+   * 产品名称
+   */
+  readonly name: string;
+  /**
+   * 供应商代码
+   */
+  readonly providerCode: string;
+  /**
+   * 产品等级：Basic, Standard, Premium
+   */
+  readonly level: string;
+  /**
+   * 产品费率信息
+   */
+  readonly rate: BasicRate;
+}
+export interface ResponseHeader {
+  /**
+   * 请求唯一标识
+   */
+  readonly transactionID: string;
+  /**
+   * 服务器ip
+   */
+  readonly serverIP: string;
+}
+export interface ResponseStatusType {
+  readonly Timestamp: string;
+  readonly Ack: AckCodeType;
+  readonly Errors: readonly ErrorDataType[];
+  readonly Build: string;
+  readonly Version: string;
+  /**
+   * 发车时间
+   */
+  readonly startTime: string;
+  readonly Extension: readonly ExtensionType[];
+  /**
+   * 描述信息
+   */
+  readonly responseDesc: string;
+  readonly userID: string;
+  readonly msg: string;
+  /**
+   * 响应编码（20000：成功）
+   */
+  readonly ResponseCode: number;
+  readonly code: string;
+  readonly reason: string;
+}
+export interface ExtensionType {
+  /**
+   * ExtensionType
+   */
+  readonly Id: string;
+  /**
+   * ExtensionType
+   */
+  readonly Version: string;
+  /**
+   * ExtensionType
+   */
+  readonly ContentType: string;
+  /**
+   * ExtensionType
+   */
+  readonly Value: string;
+}
+export interface ErrorDataType {
+  readonly Message: string;
+  /**
+   * A unique code that identifies the particular error
+   *  condition that occurred.
+   */
+  readonly ErrorCode: string;
+  /**
+   * ErrorDataType
+   */
+  readonly StackTrace: string;
+  /**
+   * ErrorDataType
+   */
+  readonly SeverityCode: SeverityCodeType;
+  /**
+   * ErrorDataType
+   */
+  readonly ErrorFields: ErrorFieldType;
+  /**
+   * ErrorDataType
+   */
+  readonly ErrorClassification: ErrorClassificationCodeType;
+}
+export interface ErrorFieldType {
+  /**
+   * ErrorFieldType
+   */
+  readonly FieldName: string;
+  /**
+   * ErrorFieldType
+   */
+  readonly ErrorCode: string;
+  /**
+   * ErrorFieldType
+   */
+  readonly Message: string;
+}
+export interface ShopRequestBody {
+  /**
+   * 默认使用缓存。用户信息变更时，需重新获取数据并刷新缓存，传递false
+   */
+  readonly useCache: boolean;
+  /**
+   * [必] 查找的产品类型：1-Flight,8-Baggage,17-CTCInsurance,20-
+   * AutoCheckIn,31-Seat,110-Car,125-AirHelp,1041-CFAR,
+   * 1050-TicketGuarantee,1051-ServicePackage,1057-Refu
+   * ndProtect,1015-CabinBaggage,1013-STP, 1006-SgrFee,
+   *  1055-CalamityFee
+   */
+  readonly productType: number;
+  /**
+   * scene=1|2,  Inflow流程和PostSale流程, 提供shoppingCartId
+   */
+  readonly shoppingCartId: string;
+  /**
+   * scene=3, SRP页面, 提供fareInfo
+   */
+  readonly fareInfo: FareInfo;
+}
+export interface FareInfo {
+  readonly cacheKey: string;
+  readonly fareId: number;
+  readonly legIds: readonly number[];
+}
+export interface RequestHeader {
+  /**
+   * 请求唯一标识
+   */
+  readonly transactionID: string;
+  /**
+   * [必] 场景：1-Flow; 2-PostSale; 3-SRP
+   */
+  readonly scene: number;
+  /**
+   * 渠道代码
+   */
+  readonly affiliateCode: string;
+  /**
+   * 市场代码
+   */
+  readonly channelCode: string;
+  /**
+   * 消费者IP地址
+   */
+  readonly consumerIP: string;
+  /**
+   * 货币
+   */
+  readonly currency: string;
+  /**
+   * 格式：en-GB
+   */
+  readonly locale: string;
+  /**
+   * 请求来源(目前只有cfar产品使用)
+   */
+  readonly offerLocation: OfferLocationEnum;
+  /**
+   * 设备信息
+   */
+  readonly device: Device;
+}
+
+export interface Device {
+  readonly id: string;
+  readonly type: string;
+  readonly platform: Platform;
+}
+
+export interface Platform {
+  readonly type: string;
+  readonly operatingSystem: OperatingSystem;
+  readonly browser: Browser;
+}
+
+export interface Browser {
+  readonly type: string;
+  readonly name: string;
+  readonly version: string;
+}
+
+export interface OperatingSystem {
+  readonly type: string;
+  readonly name: string;
+  readonly version: string;
+}

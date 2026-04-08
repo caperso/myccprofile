@@ -1,0 +1,128 @@
+import { seatTransform } from '../seat.transform';
+import { seatTypeTransform } from '../seatType.transform';
+import { unsuitablePassengerTypesTransform } from '../unsuitablePassengerTypes.transform';
+import { isCharacteristicPresent } from '../../helpers/isCharacteristicPresent';
+import { seatPassengersWithDetailsFixture } from '../__fixtures__/seatPassengers.fixture';
+import { rowApiFixture, seatPositionsFixture } from '../__fixtures__/seatRows.fixture';
+import { groupFacilities } from '../../helpers/groupFacilities';
+import { SeatTypes } from '../../constants';
+
+jest.mock('../../helpers/isCharacteristicPresent');
+jest.mock('../../helpers/groupFacilities');
+jest.mock('../seatPriceMap.transform');
+
+describe('seatTransform', () => {
+  (unsuitablePassengerTypesTransform.toEntity as jest.Mock) = jest.fn();
+  (seatTypeTransform.toEntity as jest.Mock) = jest.fn(() => ({
+    isFacility: false,
+    type: 'mockType',
+  }));
+  (isCharacteristicPresent as jest.Mock).mockImplementation(() => false);
+  (groupFacilities as jest.Mock).mockImplementation((arg) => arg);
+
+  const {
+    seats: [{ key }],
+  } = rowApiFixture;
+
+  const segmentIdentifier = 'SEG-001';
+
+  const [seatFixture] = rowApiFixture.seats;
+
+  describe('toEntity', () => {
+    it('should return transformed seats and call required transforms', () => {
+      const result = seatTransform.toEntity(
+        seatPassengersWithDetailsFixture,
+        rowApiFixture,
+        seatPositionsFixture,
+        segmentIdentifier,
+      );
+
+      expect(seatTypeTransform.toEntity).toHaveBeenCalledWith(seatFixture);
+      expect(unsuitablePassengerTypesTransform.toEntity).toHaveBeenCalledWith(
+        seatPassengersWithDetailsFixture,
+        seatFixture.characteristics,
+        rowApiFixture.characteristics,
+      );
+      expect(groupFacilities).toHaveBeenCalled();
+      expect(result).toEqual([
+        {
+          isFacility: false,
+          type: 'mockType',
+          hasBulkhead: false,
+          isSelectable: false,
+          seatKey: key,
+          seatPosition: seatPositionsFixture.A,
+          priceMap: {},
+          unsuitablePassengerTypes: undefined,
+        },
+      ]);
+    });
+
+    it('should set isSelectable true if seat is selectable and not occupied', () => {
+      const seat = { ...seatFixture, selectable: true, occupied: false };
+
+      const result = seatTransform.toEntity(
+        seatPassengersWithDetailsFixture,
+        { ...rowApiFixture, seats: [seat] },
+        seatPositionsFixture,
+        segmentIdentifier,
+      );
+
+      expect(seatTypeTransform.toEntity).toHaveBeenCalledWith(seat);
+      expect(unsuitablePassengerTypesTransform.toEntity).toHaveBeenCalledWith(
+        seatPassengersWithDetailsFixture,
+        seat.characteristics,
+        rowApiFixture.characteristics,
+      );
+      expect(groupFacilities).toHaveBeenCalled();
+      expect(result).toEqual([
+        {
+          isFacility: false,
+          type: 'mockType',
+          hasBulkhead: false,
+          isSelectable: true,
+          seatKey: key,
+          seatPosition: seatPositionsFixture.A,
+          unsuitablePassengerTypes: undefined,
+        },
+      ]);
+    });
+
+    it('should fill row with empty seats if columns count is different from seats count', () => {
+      const result = seatTransform.toEntity(
+        seatPassengersWithDetailsFixture,
+        { ...rowApiFixture, columns: ['A', 'B'] },
+        { ...seatPositionsFixture, B: seatPositionsFixture.A },
+        segmentIdentifier,
+      );
+
+      expect(seatTypeTransform.toEntity).toHaveBeenCalledWith(seatFixture);
+      expect(unsuitablePassengerTypesTransform.toEntity).toHaveBeenCalledWith(
+        seatPassengersWithDetailsFixture,
+        seatFixture.characteristics,
+        rowApiFixture.characteristics,
+      );
+      expect(groupFacilities).toHaveBeenCalled();
+      expect(result).toEqual([
+        {
+          isFacility: false,
+          type: 'mockType',
+          hasBulkhead: false,
+          isSelectable: false,
+          seatKey: key,
+          seatPosition: seatPositionsFixture.A,
+          priceMap: {},
+          unsuitablePassengerTypes: undefined,
+        },
+        {
+          hasBulkhead: false,
+          isFacility: false,
+          isSelectable: false,
+          seatKey: expect.any(String),
+          seatPosition: seatPositionsFixture.A,
+          type: SeatTypes.Empty,
+        },
+      ]);
+    });
+  });
+});

@@ -1,0 +1,277 @@
+import { changeSeatPayloadTransform } from '../changeSeatPayload.transform';
+import {
+  AncillaryUpdateOperationType,
+  AncillaryProductType,
+} from '~app/domain/ancillary/constants';
+
+describe('transformToChangeSeatPayload', () => {
+  it('should transform single passenger single segment seat selection', () => {
+    const payload = {
+      orderNumber: 'TEST-12345',
+      postSaleShoppingCartId: 'shoppingCartId123',
+      seatAssignments: [
+        {
+          segmentId: 1,
+          pnrId: 'PNR123',
+          selectedSeatProducts: [
+            {
+              seatKey: '12A',
+              passengerIndex: '1',
+            },
+          ],
+        },
+      ],
+    };
+
+    const result = changeSeatPayloadTransform(payload);
+
+    expect(result).toEqual({
+      operationType: AncillaryUpdateOperationType.Add,
+      productType: AncillaryProductType.SEAT,
+      orderNumber: 'TEST-12345',
+      extended: {
+        selectedSeat: {
+          passengers: [
+            {
+              id: 1,
+              seatAssignments: [
+                {
+                  segmentId: 1,
+                  seat: '12A',
+                },
+              ],
+            },
+          ],
+        },
+      },
+    });
+  });
+
+  it('should transform single passenger multiple segments seat selections', () => {
+    const payload = {
+      orderNumber: 'TEST-67890',
+      postSaleShoppingCartId: 'shoppingCartId123',
+      seatAssignments: [
+        {
+          segmentId: 1,
+          pnrId: 'PNR123',
+          selectedSeatProducts: [
+            {
+              seatKey: '12A',
+              passengerIndex: '1',
+            },
+          ],
+        },
+        {
+          segmentId: 2,
+          pnrId: 'PNR123',
+          selectedSeatProducts: [
+            {
+              seatKey: '15B',
+              passengerIndex: '1',
+            },
+          ],
+        },
+      ],
+    };
+
+    const result = changeSeatPayloadTransform(payload);
+
+    expect(result).toEqual({
+      operationType: AncillaryUpdateOperationType.Add,
+      productType: AncillaryProductType.SEAT,
+      orderNumber: 'TEST-67890',
+      extended: {
+        selectedSeat: {
+          passengers: [
+            {
+              id: 1,
+              seatAssignments: [
+                {
+                  segmentId: 1,
+                  seat: '12A',
+                },
+                {
+                  segmentId: 2,
+                  seat: '15B',
+                },
+              ],
+            },
+          ],
+        },
+      },
+    });
+  });
+
+  it('should transform multiple passengers multiple segments seat selections', () => {
+    const payload = {
+      orderNumber: 'TEST-MULTI',
+      postSaleShoppingCartId: 'shoppingCartId123',
+      seatAssignments: [
+        {
+          segmentId: 1,
+          pnrId: 'PNR123',
+          selectedSeatProducts: [
+            {
+              seatKey: '12A',
+              passengerIndex: '1',
+            },
+            {
+              seatKey: '12B',
+              passengerIndex: '2',
+            },
+          ],
+        },
+        {
+          segmentId: 2,
+          pnrId: 'PNR123',
+          selectedSeatProducts: [
+            {
+              seatKey: '15A',
+              passengerIndex: '1',
+            },
+            {
+              seatKey: '15B',
+              passengerIndex: '2',
+            },
+          ],
+        },
+      ],
+    };
+
+    const result = changeSeatPayloadTransform(payload);
+
+    expect(result).toEqual({
+      operationType: AncillaryUpdateOperationType.Add,
+      productType: AncillaryProductType.SEAT,
+      orderNumber: 'TEST-MULTI',
+      extended: {
+        selectedSeat: {
+          passengers: [
+            {
+              id: 1,
+              seatAssignments: [
+                {
+                  segmentId: 1,
+                  seat: '12A',
+                },
+                {
+                  segmentId: 2,
+                  seat: '15A',
+                },
+              ],
+            },
+            {
+              id: 2,
+              seatAssignments: [
+                {
+                  segmentId: 1,
+                  seat: '12B',
+                },
+                {
+                  segmentId: 2,
+                  seat: '15B',
+                },
+              ],
+            },
+          ],
+        },
+      },
+    });
+  });
+
+  it('should group seat assignments by passenger across segments', () => {
+    const payload = {
+      orderNumber: 'TEST-GROUP',
+      postSaleShoppingCartId: 'shoppingCartId123',
+      seatAssignments: [
+        {
+          segmentId: 1,
+          pnrId: 'PNR123',
+          selectedSeatProducts: [
+            {
+              seatKey: '1A',
+              passengerIndex: '1',
+            },
+          ],
+        },
+        {
+          segmentId: 2,
+          pnrId: 'PNR123',
+          selectedSeatProducts: [
+            {
+              seatKey: '2B',
+              passengerIndex: '1',
+            },
+          ],
+        },
+        {
+          segmentId: 3,
+          pnrId: 'PNR123',
+          selectedSeatProducts: [
+            {
+              seatKey: '3C',
+              passengerIndex: '1',
+            },
+          ],
+        },
+      ],
+    };
+
+    const result = changeSeatPayloadTransform(payload);
+
+    expect(result.extended!.selectedSeat!.passengers).toHaveLength(1);
+    expect(result.extended!.selectedSeat!.passengers[0].id).toBe(1);
+    expect(result.extended!.selectedSeat!.passengers[0].seatAssignments).toHaveLength(3);
+    expect(result.extended!.selectedSeat!.passengers[0].seatAssignments).toEqual([
+      { segmentId: 1, seat: '1A' },
+      { segmentId: 2, seat: '2B' },
+      { segmentId: 3, seat: '3C' },
+    ]);
+  });
+
+  it('should convert passengerIndex string to number', () => {
+    const payload = {
+      orderNumber: 'TEST-CONVERT',
+      postSaleShoppingCartId: 'shoppingCartId123',
+      seatAssignments: [
+        {
+          segmentId: 1,
+          pnrId: 'PNR123',
+          selectedSeatProducts: [
+            {
+              seatKey: '10D',
+              passengerIndex: '999',
+            },
+          ],
+        },
+      ],
+    };
+
+    const result = changeSeatPayloadTransform(payload);
+
+    expect(result.extended!.selectedSeat!.passengers[0].id).toBe(999);
+    expect(typeof result.extended!.selectedSeat!.passengers[0].id).toBe('number');
+  });
+
+  it('should handle empty seat assignments', () => {
+    const payload = {
+      orderNumber: 'TEST-EMPTY',
+      postSaleShoppingCartId: 'shoppingCartId123',
+      seatAssignments: [],
+    };
+
+    const result = changeSeatPayloadTransform(payload);
+
+    expect(result).toEqual({
+      operationType: AncillaryUpdateOperationType.Add,
+      productType: AncillaryProductType.SEAT,
+      orderNumber: 'TEST-EMPTY',
+      extended: {
+        selectedSeat: {
+          passengers: [],
+        },
+      },
+    });
+  });
+});

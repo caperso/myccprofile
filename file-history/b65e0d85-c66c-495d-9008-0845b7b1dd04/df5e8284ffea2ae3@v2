@@ -1,0 +1,22 @@
+import { SeatPassengerWithDetail, SeatPriceMap } from '../types/seat.type';
+
+export const seatPriceMapTransform = {
+  toEntity(
+    seatKey: string,
+    segmentIdentifier: string,
+    passengers: readonly SeatPassengerWithDetail[],
+  ): SeatPriceMap {
+    return passengers.reduce((acc, pax) => {
+      const priceDetailsPassenger = pax.seatMapDetails.find(
+        (item) => item.segmentIdentifier === segmentIdentifier,
+      );
+
+      const seatPrice = priceDetailsPassenger?.seatDisplayPrices[seatKey]?.number;
+      const currentPaxSeatPrice: SeatPriceMap = {
+        [pax.passengerIndex]: seatPrice ? Number(seatPrice) : undefined,
+      };
+
+      return { ...acc, ...currentPaxSeatPrice };
+    }, {});
+  },
+};

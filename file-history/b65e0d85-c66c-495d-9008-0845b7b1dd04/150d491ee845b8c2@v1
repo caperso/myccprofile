@@ -1,0 +1,4 @@
+export interface SeatAssignment {
+  readonly seat: string;
+  readonly segmentId: number;
+}

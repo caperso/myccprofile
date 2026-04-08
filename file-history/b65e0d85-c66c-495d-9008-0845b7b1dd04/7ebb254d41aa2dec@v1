@@ -1,0 +1,52 @@
+import { Levels } from '@xivart/lumberjack/logger/types/levels.type';
+
+import { SeatAssignment } from '~app/domain/ancillary/postSale/types/seatPassenger.type';
+import { seatTypeTransform } from './seatType.transform';
+import { EdgeError } from '~app/infrastructure/error-handler/edgeError';
+import { ErrorCode } from '~app/infrastructure/error-handler/types/errorCode';
+import { SeatAssignmentsTransformPayload } from '../types/seatAssignment.type';
+import { flatSeatMap } from '../helpers/flatSeatMap';
+
+export const seatAssignmentsTransform = {
+  toEntity: ({
+    passengerApi,
+    segmentId,
+    decksApi,
+  }: SeatAssignmentsTransformPayload): readonly SeatAssignment[] => {
+    const seatAssignments: SeatAssignment[] = [];
+
+    const flattedSeatsMap = flatSeatMap(decksApi);
+
+    passengerApi.seatAssignments.forEach((item) => {
+      if (item.segmentId === segmentId) {
+        const seatMapDetail = passengerApi.seatMapDetails.find(
+          (detail) => detail.segmentId === segmentId,
+        );
+
+        const seat = flattedSeatsMap[item.seat];
+
+        if (!seat || !seatMapDetail) {
+          throw new EdgeError({
+            code: ErrorCode.GetPostSaleSeatFailed,
+            message: `Seat or passenger data is incomplete`,
+            config: { severity: Levels.error },
+            source: __filename,
+          });
+        }
+
+        const seatType = seatTypeTransform.toEntity(seat).type;
+
+        const seatDisplayPrice = Number(seatMapDetail.seatDisplayPrices[seat.key] || 0);
+
+        seatAssignments.push({
+          seatKey: item.seat,
+          status: item.status,
+          seatDisplayPrice,
+          type: seatType,
+        });
+      }
+    });
+
+    return seatAssignments;
+  },
+};

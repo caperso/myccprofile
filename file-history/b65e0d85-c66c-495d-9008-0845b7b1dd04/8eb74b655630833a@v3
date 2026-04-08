@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": ["Bash(npx tsc:*)", "Bash(nca)", "Bash(zsh -i -c \"nca\")"]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "zsh -i -c \"nca\""
+          }
+        ]
+      }
+    ]
+  }
+}
