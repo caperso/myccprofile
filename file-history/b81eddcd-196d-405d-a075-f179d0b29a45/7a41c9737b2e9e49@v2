@@ -1,0 +1,41 @@
+import {
+  SeatAssignmentStatus,
+  SeatSelection,
+  SelectSeatAssignment,
+  SelectedSeatProduct,
+} from '@ctrip/myaccount-edge/types/postSale';
+
+export const createSeatAssignmentPayload = (
+  seatSelection: SeatSelection[],
+): SelectSeatAssignment[] =>
+  seatSelection.reduce<SelectSeatAssignment[]>((acc, currentSelection) => {
+    if (currentSelection.status === SeatAssignmentStatus.PURCHASED) {
+      return acc;
+    }
+
+    const selectedSeat: SelectedSeatProduct = {
+      seatKey: currentSelection.seatKey,
+      passengerIndex: currentSelection.passengerIndex,
+    };
+
+    const seatAssignmentPayload = acc.find(
+      (item) => item.segmentIdentifier === currentSelection.segmentIdentifier,
+    );
+
+    if (seatAssignmentPayload) {
+      (seatAssignmentPayload.selectedSeatProducts as SelectedSeatProduct[]).push(
+        selectedSeat,
+      );
+
+      return acc;
+    }
+
+    const newSeatAssignmentPayload = {
+      segmentIdentifier: currentSelection.segmentIdentifier,
+      selectedSeatProducts: [selectedSeat],
+    };
+
+    acc.push(newSeatAssignmentPayload);
+
+    return acc;
+  }, []);

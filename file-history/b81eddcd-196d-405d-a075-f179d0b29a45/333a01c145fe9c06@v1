@@ -1,0 +1,24 @@
+import { Deck, Seat, SeatSelection } from '@xivart/edge/types/postSale';
+import { CollapseItemProps } from '@xivart/tangram/components/Collapse/types';
+
+import { WithGtmProps } from '~app/domains/Common/containers/WithGtm/types';
+import {
+  SeatAssignmentsPassenger,
+  SeatSegment,
+} from '~app/domains/PostSale/containers/SeatContainer/types';
+
+export interface SegmentSeatCardProps extends CollapseItemProps, WithGtmProps {
+  segment: SeatSegment;
+  onAdd: () => void;
+  isLast: boolean;
+  currentPassenger?: SeatAssignmentsPassenger;
+  setCurrentPassenger: (passenger: SeatAssignmentsPassenger) => void;
+  seatSelections: SeatSelection[];
+  currentSegmentPrice: number;
+  onClickSeat: (seat: Seat) => void;
+  currentDeck?: Deck;
+  setCurrentDeck: (deck: Deck) => void;
+  isAllSegmentPurchased: boolean;
+  purchasedSeats: SeatSelection[];
+  position: number;
+}

@@ -1,0 +1,243 @@
+import { Segment } from '@ctrip/myaccount-edge/types/postSale';
+import { FlightDirection } from '@xivart/edge/types/kernel';
+import { LegendItem, Legend } from '@xivart/edge/types/postSale';
+import { SeatSupplierTypes, SeatTypes } from '@xivart/edge/types/seatMap';
+
+import {
+  flight1Airport1,
+  flight1Airport2,
+  flight1Airport3,
+  flight2Airport1,
+  flight2Airport2,
+  flight2Airport3,
+} from './AirportsMock';
+import {
+  segment1PassengersMock,
+  segment2PassengersMock,
+  segment3PassengersMock,
+  segment4PassengersMock,
+} from './PassengersMock';
+import { decksMock } from './SeatMapMock';
+import {
+  segment1SeatPassengersMock,
+  segment2SeatPassengersMock,
+  segment3SeatPassengersMock,
+  segment4SeatPassengersMock,
+} from './SeatPassengersMock';
+import {
+  combinationId1,
+  combinationId2,
+  combinationId3,
+  combinationId4,
+  flightNumberMock1,
+  flightNumberMock2,
+  flightNumberMock3,
+  flightNumberMock4,
+  legId1,
+  legId2,
+  passengerIndex1,
+  passengerIndex2,
+  passengerIndex3,
+  pnrId1,
+  pnrId2,
+  pnrRecordLocator1,
+  pnrRecordLocator2,
+  SeatStandardPrice,
+  segmentId1,
+  segmentId2,
+} from './constants';
+import {
+  AvailableSegment,
+  NotAvailableSegment,
+} from '~app/domains/PostSale/containers/SeatContainer/types';
+
+export const legendItemsMock: LegendItem[] = [
+  { type: SeatTypes.NotAvailable },
+  {
+    type: SeatTypes.Standard,
+    price: { min: Number(SeatStandardPrice), max: Number(SeatStandardPrice) },
+  },
+  { type: SeatTypes.Comfort, price: { min: 50, max: 50 } },
+  { type: SeatTypes.AdditionalLegroom, price: { min: 35, max: 40 } },
+];
+
+export const seatLegendMock: Legend = {
+  [passengerIndex1]: legendItemsMock,
+  [passengerIndex2]: legendItemsMock.slice(0, 1),
+  [passengerIndex3]: legendItemsMock.slice(0, 2),
+};
+
+export const legendItems2Mock: LegendItem[] = [
+  {
+    type: SeatTypes.Standard,
+    price: { min: Number(SeatStandardPrice), max: Number(SeatStandardPrice) },
+  },
+  { type: SeatTypes.Comfort, price: { min: 50, max: 50 } },
+  { type: SeatTypes.AdditionalLegroom, price: { min: 35, max: 40 } },
+];
+
+export const seatLegend2Mock: Legend = {
+  [passengerIndex1]: legendItems2Mock,
+  [passengerIndex2]: legendItems2Mock.slice(0, 1),
+  [passengerIndex3]: legendItems2Mock.slice(0, 2),
+};
+
+export const segment1Mock: Segment = {
+  pnrId: pnrId1,
+  pnrRecordLocator: pnrRecordLocator1,
+  legId: legId1,
+  segmentId: segmentId1,
+  combinationId: combinationId1,
+  airlineLocator: 'LOCATOR',
+
+  departureAirportCode: flight1Airport1.code,
+  departureAirportCity: flight1Airport1.city,
+  departureDateTime: flight1Airport1.date!,
+  arrivalAirportCode: flight1Airport2.code,
+  arrivalAirportCity: flight1Airport2.city,
+  arrivalDateTime: flight1Airport2.date!,
+
+  passengers: segment1SeatPassengersMock,
+  decks: decksMock,
+  markUp: '4',
+  seatSupplier: SeatSupplierTypes.Gordian,
+  legend: seatLegendMock,
+  flightNumber: flightNumberMock1,
+  segmentIdentifier: '',
+};
+
+export const segment2Mock: Segment = {
+  pnrId: pnrId1,
+  pnrRecordLocator: pnrRecordLocator2,
+  legId: legId1,
+  segmentId: segmentId2,
+  combinationId: combinationId2,
+  airlineLocator: 'LOCATOR',
+
+  departureAirportCode: flight1Airport2.code,
+  departureAirportCity: flight1Airport2.city,
+  departureDateTime: flight1Airport2.date!,
+  arrivalAirportCode: flight1Airport3.code,
+  arrivalAirportCity: flight1Airport3.city,
+  arrivalDateTime: flight1Airport3.date!,
+
+  passengers: segment2SeatPassengersMock,
+  decks: decksMock,
+  markUp: '4',
+  seatSupplier: SeatSupplierTypes.Gordian,
+  legend: seatLegendMock,
+  flightNumber: flightNumberMock2,
+  segmentIdentifier: '',
+};
+
+export const segment3Mock: Segment = {
+  pnrId: pnrId2,
+  pnrRecordLocator: pnrRecordLocator1,
+  legId: legId1,
+  segmentId: segmentId1,
+  combinationId: combinationId3,
+  airlineLocator: 'LOCATOR',
+
+  departureAirportCode: flight2Airport1.code,
+  departureAirportCity: flight2Airport1.city,
+  departureDateTime: flight2Airport1.date!,
+  arrivalAirportCode: flight2Airport2.code,
+  arrivalAirportCity: flight2Airport2.city,
+  arrivalDateTime: flight2Airport2.date!,
+
+  passengers: segment3SeatPassengersMock,
+  decks: decksMock,
+  markUp: '4',
+  seatSupplier: SeatSupplierTypes.Gordian,
+  legend: seatLegendMock,
+  flightNumber: flightNumberMock3,
+  segmentIdentifier: '',
+};
+
+export const segment4Mock: Segment = {
+  pnrId: pnrId2,
+  pnrRecordLocator: pnrRecordLocator2,
+  legId: legId2,
+  segmentId: segmentId2,
+  combinationId: combinationId4,
+  airlineLocator: 'LOCATOR',
+
+  departureAirportCode: flight2Airport2.code,
+  departureAirportCity: flight2Airport2.city,
+  departureDateTime: flight2Airport2.date!,
+  arrivalAirportCode: flight2Airport3.code,
+  arrivalAirportCity: flight2Airport3.city,
+  arrivalDateTime: flight2Airport3.date!,
+
+  passengers: segment4SeatPassengersMock,
+  decks: decksMock,
+  markUp: '4',
+  seatSupplier: SeatSupplierTypes.Gordian,
+  legend: seatLegendMock,
+  flightNumber: flightNumberMock4,
+  segmentIdentifier: '',
+};
+
+export const segmentsMock: Segment[] = [
+  segment1Mock,
+  segment2Mock,
+  segment3Mock,
+  segment4Mock,
+];
+
+export const availableSegmentsMock: AvailableSegment[] = [
+  {
+    ...segment1Mock,
+    direction: FlightDirection.Outbound,
+    passengers: segment1PassengersMock,
+    segmentIdentifier: '',
+  },
+  {
+    ...segment2Mock,
+    direction: FlightDirection.Outbound,
+    passengers: segment2PassengersMock,
+    segmentIdentifier: '',
+  },
+  {
+    ...segment3Mock,
+    direction: FlightDirection.Inbound,
+    passengers: segment3PassengersMock,
+    segmentIdentifier: '',
+  },
+  {
+    ...segment4Mock,
+    direction: FlightDirection.Inbound,
+    passengers: segment4PassengersMock,
+    segmentIdentifier: '',
+  },
+];
+
+export const notAvailableSegmentMock: NotAvailableSegment = {
+  departureAirportCode: flight1Airport1.code,
+  departureAirportCity: flight1Airport1.city,
+  arrivalAirportCode: flight1Airport2.code,
+  arrivalAirportCity: flight1Airport2.city,
+  direction: FlightDirection.Inbound,
+  decks: [],
+};
+
+export const availableSegmentsWithCarrierMock: AvailableSegment[] = availableSegmentsMock.map(
+  (segment) => ({
+    ...segment,
+    carrier: {
+      code: 'TK',
+      name: 'Turkish Airlines',
+      displayName: 'Turkish Airlines',
+    },
+    legend: seatLegend2Mock,
+  }),
+);
+
+export const notAvailableSegmentWithCarrierMock: NotAvailableSegment = {
+  ...notAvailableSegmentMock,
+  carrier: {
+    code: 'TK',
+    name: 'Turkish Airlines',
+    displayName: 'Turkish Airlines',
+  },
+};

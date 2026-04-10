@@ -1,0 +1,44 @@
+import {
+  SeatAssignmentPayload,
+  SeatAssignmentStatus,
+  SeatSelection,
+  SelectedSeatProductsPayload,
+} from '@xivart/edge/types/postSale';
+
+export const createSeatAssignmentPayload = (
+  seatSelection: SeatSelection[],
+): SeatAssignmentPayload[] =>
+  seatSelection.reduce<SeatAssignmentPayload[]>((acc, currentSelection) => {
+    if (currentSelection.status === SeatAssignmentStatus.PURCHASED) {
+      return acc;
+    }
+
+    const selectedSeat: SelectedSeatProductsPayload = {
+      seatKey: currentSelection.seatKey,
+      passengerIndex: currentSelection.passengerIndex,
+    };
+
+    const seatAssignmentPayload = acc.find(
+      (item) =>
+        item.pnrLocator === currentSelection.pnr &&
+        item.pnrId === currentSelection.pnrId &&
+        item.segmentId === currentSelection.segmentId,
+    );
+
+    if (seatAssignmentPayload) {
+      seatAssignmentPayload.selectedSeatProducts.push(selectedSeat);
+
+      return acc;
+    }
+
+    const newSeatAssignmentPayload: SeatAssignmentPayload = {
+      segmentId: currentSelection.segmentId,
+      pnrId: currentSelection.pnrId,
+      pnrLocator: currentSelection.pnr,
+      selectedSeatProducts: [selectedSeat],
+    };
+
+    acc.push(newSeatAssignmentPayload);
+
+    return acc;
+  }, []);

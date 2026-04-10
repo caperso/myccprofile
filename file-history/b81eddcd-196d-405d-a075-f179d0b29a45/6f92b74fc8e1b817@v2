@@ -1,0 +1,11 @@
+import { SeatSelection } from '@ctrip/myaccount-edge/types/postSale';
+
+import { SeatComponentSegment } from '~app/domains/PostSale/components/SeatModal/types';
+
+export const getCurrentSegmentSelections = (
+  selections: SeatSelection[],
+  currentSegment: SeatComponentSegment,
+): SeatSelection[] =>
+  selections.filter(
+    ({ combinationId }) => combinationId === currentSegment.combinationId,
+  );

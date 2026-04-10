@@ -1,0 +1,18 @@
+import { SeatSelection } from '@xivart/edge/types/postSale';
+import { Deck, Seat } from '@xivart/edge/types/seatMap';
+
+import {
+  AvailableSegment,
+  SeatAssignmentsPassenger,
+} from '~app/domains/PostSale/containers/SeatContainer/types';
+
+export interface SeatMapPassengersProps {
+  seatSelections: SeatSelection[];
+  currentSegment: AvailableSegment;
+  currentPassenger: SeatAssignmentsPassenger;
+  setCurrentPassenger: (passenger: SeatAssignmentsPassenger) => void;
+  onClickSeat: (seat: Seat) => void;
+  currentDeck: Deck;
+  setCurrentDeck: (deck: Deck) => void;
+  purchasedSeats: SeatSelection[];
+}

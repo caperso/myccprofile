@@ -1,0 +1,22 @@
+import { Deck, Seat } from '@xivart/edge/types/postSale';
+import { SeatSelection } from '@ctrip/myaccount-edge/types/postSale';
+
+import {
+  AvailableSegment,
+  BasicSeatPassenger,
+  SeatSegment,
+} from '~app/domains/PostSale/containers/SeatContainer/types';
+
+export interface SeatCollapsePanelProps {
+  segments: SeatSegment[];
+  seatSelections: SeatSelection[];
+  purchasedSeats: SeatSelection[];
+  currentDeck?: Deck;
+  currentPassenger?: BasicSeatPassenger;
+  currentSegment?: AvailableSegment;
+  currentSegmentIndex?: number;
+  onClickSeat: (seat: Seat) => void;
+  setCurrentDeck: (deck: Deck) => void;
+  setCurrentPassenger: (passenger: BasicSeatPassenger) => void;
+  setCurrentSegmentIndex: (index?: number) => void;
+}

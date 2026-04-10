@@ -1,0 +1,10 @@
+import { SeatSelection } from '@xivart/edge/types/postSale';
+
+export const getTotalPrice = (selections: SeatSelection[]): number => {
+  let totalPrice = 0;
+  selections.forEach(({ seatPrice }) => {
+    totalPrice += seatPrice;
+  });
+
+  return totalPrice;
+};

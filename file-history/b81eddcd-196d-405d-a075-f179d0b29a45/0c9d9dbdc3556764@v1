@@ -1,0 +1,393 @@
+import { SeatResponsePayload } from '@ctrip/myaccount-edge/types/postSale';
+
+import { selectSegments } from '../selectSegments';
+import history from '~app/domains/Common/services/History';
+import {
+  bookingDetailsResponse,
+  outBoundBookingDetailsMock,
+} from '~app/internal/apiMocks/postSale/BookingResponse';
+import {
+  availableSegmentsMock as availableSegmentsMockOriginal,
+  segmentsMock as segmentsMockOriginal,
+} from '~app/internal/apiMocks/postSale/basicObjects/SegmentsMock';
+import { ClientPageLogTypes, logger } from '~app/logger';
+
+const segmentsMock = segmentsMockOriginal.map((s) => ({
+  ...s,
+  airlineLocator: 'BT',
+  segmentIdentifier: s.flightNumber,
+}));
+const availableSegmentsMock = availableSegmentsMockOriginal.map((s) => ({
+  ...s,
+  airlineLocator: 'BT',
+  segmentIdentifier: s.flightNumber,
+}));
+
+describe('selectSegments', () => {
+  const { resultFunc } = selectSegments;
+
+  it('should assemble available and not available segments from the booking', () => {
+    const result = resultFunc(
+      { segments: [segmentsMock[0], segmentsMock[1], segmentsMock[2]] },
+      bookingDetailsResponse,
+      undefined,
+    );
+    const expectedBase = [
+      availableSegmentsMock[0],
+      availableSegmentsMock[1],
+      availableSegmentsMock[2],
+      {
+        arrivalAirportCity: 'Vilnius',
+        arrivalAirportCode: 'VNO',
+        decks: [],
+        departureAirportCity: 'Berlin',
+        departureAirportCode: 'BER',
+        direction: 'Inbound',
+      },
+    ].map((segment) => {
+      const base: any = {
+        ...segment,
+        carrier: {
+          code: 'WS',
+          name: 'Westjet',
+        },
+      };
+
+      if ((segment as any).passengers !== undefined) {
+        base.passengers = ((segment as any).passengers || []).map((p: any) => ({
+          firstName: p.firstName,
+          lastName: p.lastName,
+          passengerType: p.passengerType,
+          passengerIndex: p.passengerIndex,
+          seatAssignments: p.seatAssignments,
+        }));
+      }
+
+      return base;
+    });
+
+    expect(result).toStrictEqual(expectedBase);
+  });
+
+  it('should return [] when it has no data', () => {
+    expect(
+      resultFunc(({} as unknown) as SeatResponsePayload, [], undefined),
+    ).toStrictEqual([]);
+  });
+
+  it('should return [] when it has no segment data', () => {
+    expect(
+      resultFunc(
+        ({
+          segments: [],
+        } as unknown) as SeatResponsePayload,
+        [],
+        undefined,
+      ),
+    ).toStrictEqual([]);
+  });
+
+  it('will return [] as default leg segment when segment has no data', () => {
+    const result = resultFunc(
+      { segments: [segmentsMock[0], segmentsMock[1], segmentsMock[2]] },
+      [
+        {
+          ...outBoundBookingDetailsMock,
+          legs: [
+            { ...outBoundBookingDetailsMock.legs[0], segments: undefined },
+          ],
+        },
+      ],
+      undefined,
+    );
+
+    expect(result).toStrictEqual([]);
+  });
+
+  it('will log and return NotAvailable segment when segment has no deck', () => {
+    history.location.search = '?booking_id=CHNL-123';
+    const result = resultFunc(
+      { segments: [{ ...segmentsMock[0], decks: [] }] },
+      [outBoundBookingDetailsMock],
+      undefined,
+    );
+
+    expect(result).toStrictEqual([
+      {
+        arrivalAirportCity: 'Toronto',
+        arrivalAirportCode: 'YYZ',
+        decks: [],
+        departureAirportCity: 'Vilnius',
+        departureAirportCode: 'VNO',
+        direction: 'Outbound',
+        carrier: {
+          code: 'WS',
+          name: 'Westjet',
+        },
+      },
+      {
+        arrivalAirportCity: 'Amsterdam',
+        arrivalAirportCode: 'AMS',
+        decks: [],
+        departureAirportCity: 'Toronto',
+        departureAirportCode: 'YYZ',
+        direction: 'Outbound',
+        carrier: {
+          code: 'WS',
+          name: 'Westjet',
+        },
+      },
+    ]);
+
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.objectContaining({
+        error: expect.objectContaining({
+          code: ClientPageLogTypes.PostSaleSeatNoDecks,
+          message: segmentsMock[0].segmentIdentifier,
+        }),
+        messageType: ClientPageLogTypes.PostSaleSeatNoDecks,
+      }),
+    );
+  });
+
+  it('will log and return NotAvailable segment when segment has not match booking number', () => {
+    history.location.search = '?booking_id=CHNL-123';
+    const result = resultFunc(
+      { segments: segmentsMock },
+      [
+        {
+          ...outBoundBookingDetailsMock,
+          legs: [
+            {
+              ...outBoundBookingDetailsMock.legs[0],
+              segments: [
+                {
+                  ...outBoundBookingDetailsMock.legs[0].segments![0],
+                  flightNumber: 'correct one',
+                },
+              ],
+            },
+          ],
+        },
+      ],
+      undefined,
+    );
+
+    expect(result).toStrictEqual([
+      {
+        arrivalAirportCity: 'Toronto',
+        arrivalAirportCode: 'YYZ',
+        decks: [],
+        departureAirportCity: 'Vilnius',
+        departureAirportCode: 'VNO',
+        direction: 'Outbound',
+        carrier: {
+          code: 'WS',
+          name: 'Westjet',
+        },
+      },
+    ]);
+
+    expect(logger.warn).toHaveBeenCalledWith({
+      messageType: ClientPageLogTypes.PostSaleSegmentNotMatched,
+      error: {
+        code: ClientPageLogTypes.PostSaleSegmentNotMatched,
+        message:
+          'order number: TEST-PERSONA-Emily, booking segment identifier: pnrId1-correct one',
+        source: expect.any(String),
+        stacktrace: expect.any(String),
+      },
+    });
+    expect(logger.warn).toHaveBeenCalledWith({
+      messageType: ClientPageLogTypes.PostSaleSeatFlightNumberNotMatched,
+      error: {
+        code: ClientPageLogTypes.PostSaleSeatFlightNumberNotMatched,
+        message:
+          'hasSameFlightNumber: false, order flight number: correct one, seat segments: ["1","2","3","4"]',
+        source: expect.any(String),
+        stacktrace: expect.any(String),
+      },
+    });
+  });
+
+  it('will log and return NotAvailable segment when segment has not match booking number because no segments', () => {
+    history.location.search = '?booking_id=CHNL-123';
+    const result = resultFunc(
+      { segments: [] },
+      [
+        {
+          ...outBoundBookingDetailsMock,
+          legs: [
+            {
+              ...outBoundBookingDetailsMock.legs[0],
+              segments: [
+                {
+                  ...outBoundBookingDetailsMock.legs[0].segments![0],
+                  flightNumber: 'correct one',
+                },
+              ],
+            },
+          ],
+        },
+      ],
+      undefined,
+    );
+
+    expect(result).toStrictEqual([
+      {
+        arrivalAirportCity: 'Toronto',
+        arrivalAirportCode: 'YYZ',
+        decks: [],
+        departureAirportCity: 'Vilnius',
+        departureAirportCode: 'VNO',
+        direction: 'Outbound',
+        carrier: {
+          code: 'WS',
+          name: 'Westjet',
+        },
+      },
+    ]);
+
+    expect(logger.warn).toHaveBeenCalledWith({
+      messageType: ClientPageLogTypes.PostSaleSegmentNotMatched,
+      error: {
+        code: ClientPageLogTypes.PostSaleSegmentNotMatched,
+        message:
+          'order number: TEST-PERSONA-Emily, booking segment identifier: pnrId1-correct one',
+        source: expect.any(String),
+        stacktrace: expect.any(String),
+      },
+    });
+    expect(logger.warn).not.toHaveBeenCalledWith({
+      messageType: ClientPageLogTypes.PostSaleSeatFlightNumberNotMatched,
+      error: {
+        code: ClientPageLogTypes.PostSaleSeatFlightNumberNotMatched,
+        message:
+          'hasSameFlightNumber: false, order flight number: correct one, seat segments: ["flightNumber1","flightNumber2","flightNumber3","flightNumber4"]',
+        source: expect.any(String),
+        stacktrace: expect.any(String),
+      },
+    });
+  });
+
+  it('handles AccountBookingDetailsV2 booking parameter', () => {
+    const accountBookingV2: any = {
+      ...outBoundBookingDetailsMock,
+      passengers: outBoundBookingDetailsMock.passengers.map((p) => ({
+        ...p,
+        id: (p as any).passengerIndex,
+      })),
+    };
+
+    const result = resultFunc(
+      { segments: [segmentsMock[0], segmentsMock[1]] },
+      [],
+      accountBookingV2,
+    );
+
+    expect(result).toHaveLength(2);
+    expect(result.map((s) => s.arrivalAirportCode)).toEqual([
+      segmentsMock[0].arrivalAirportCode,
+      segmentsMock[1].arrivalAirportCode,
+    ]);
+    expect(result[0].carrier).toEqual({ code: 'WS', name: 'Westjet' });
+  });
+
+  it('should handle booking with undefined passengers', () => {
+    const bookingWithoutPassengers: any = {
+      ...outBoundBookingDetailsMock,
+      passengers: undefined,
+    };
+
+    const result = resultFunc(
+      { segments: [segmentsMock[0]] },
+      [bookingWithoutPassengers],
+      undefined,
+    );
+
+    expect(result).toHaveLength(2);
+    if ('passengers' in result[0]) {
+      expect(result[0].passengers).toEqual([]);
+    }
+  });
+
+  it('should handle booking with undefined legs', () => {
+    const bookingWithoutLegs: any = {
+      ...outBoundBookingDetailsMock,
+      legs: undefined,
+    };
+
+    const result = resultFunc(
+      { segments: [segmentsMock[0]] },
+      [bookingWithoutLegs],
+      undefined,
+    );
+
+    expect(result).toEqual([]);
+  });
+
+  it('should skip passengers not found in booking', () => {
+    const segmentWithUnknownPassenger: any = {
+      ...segmentsMock[0],
+      passengers: [
+        ...segmentsMock[0].passengers,
+        {
+          passengerIndex: 'unknown-index',
+          seatAssignments: [],
+          type: 'Adult',
+        },
+      ],
+    };
+
+    const result = resultFunc(
+      { segments: [segmentWithUnknownPassenger] },
+      [outBoundBookingDetailsMock],
+      undefined,
+    );
+
+    if ('passengers' in result[0]) {
+      expect(result[0].passengers).toHaveLength(
+        segmentsMock[0].passengers.length,
+      );
+    }
+  });
+
+  it('handles booking with passengers having id but no passengerIndex', () => {
+    const accountBookingV2: any = {
+      ...outBoundBookingDetailsMock,
+      passengers: outBoundBookingDetailsMock.passengers.map((p) => {
+        const { passengerIndex, ...rest } = p as any;
+        return {
+          ...rest,
+          id: passengerIndex,
+        };
+      }),
+    };
+
+    const result = resultFunc(
+      { segments: [segmentsMock[0]] },
+      [],
+      accountBookingV2,
+    );
+
+    expect(result).toHaveLength(2);
+  });
+
+  it('should handle booking with null passengers', () => {
+    const bookingWithNullPassengers = {
+      ...outBoundBookingDetailsMock,
+      passengers: null,
+    } as any;
+
+    const result = resultFunc(
+      { segments: [segmentsMock[0]] },
+      [bookingWithNullPassengers],
+      undefined,
+    );
+
+    expect(result).toHaveLength(2);
+    if ('passengers' in result[0]) {
+      expect(result[0].passengers).toEqual([]);
+    }
+  });
+});

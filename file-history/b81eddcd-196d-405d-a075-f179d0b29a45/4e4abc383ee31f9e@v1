@@ -1,0 +1,13 @@
+import { SeatSelection } from '@xivart/edge/types/postSale';
+import { Deck, Seat } from '@xivart/edge/types/seatMap';
+
+import { SeatComponentPassenger } from '~app/domains/PostSale/components/SeatModal/types';
+
+export interface SeatMapHorizontallyProps {
+  currentDeck: Deck;
+  combinationId: string;
+  currentPassenger: SeatComponentPassenger;
+  selections: SeatSelection[];
+  purchasedSeats: SeatSelection[];
+  onClickSeat: (seat: Seat) => void;
+}

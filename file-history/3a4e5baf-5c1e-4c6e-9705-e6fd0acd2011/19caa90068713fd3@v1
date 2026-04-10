@@ -1,0 +1,27 @@
+import { accountSeatAssignmentsFixture } from '~app/domain/ancillary/postSale/transforms/__fixtures__/seatAssignments.fixture';
+import { purchasedSeatTransform } from '~app/domain/ancillary/postSale/transforms/purchasedSeat.transform';
+import { pnrId1Fixture } from '~app/domain/ancillary/postSale/transforms/__fixtures__/pnr.fixture';
+import { SeatAssignmentStatus } from '../../constants';
+
+describe('purchasedSeatTransform', () => {
+  describe('toEntity', () => {
+    it('should transform the correct data', () => {
+      const result = purchasedSeatTransform.toEntity(accountSeatAssignmentsFixture, pnrId1Fixture);
+
+      expect(result).toStrictEqual([
+        {
+          seatKey: '2B',
+          segmentId: 1,
+          pnrId: pnrId1Fixture,
+          status: SeatAssignmentStatus.PURCHASED,
+        },
+        {
+          seatKey: '2B',
+          segmentId: 2,
+          pnrId: pnrId1Fixture,
+          status: SeatAssignmentStatus.PURCHASED,
+        },
+      ]);
+    });
+  });
+});

@@ -1,0 +1,195 @@
+import { ReactElement } from 'react';
+
+import { SeatSelection, Segment } from '@ctrip/myaccount-edge/types/postSale';
+import { Carrier } from '@xivart/edge/types/account';
+import { FlightDirection, PassengerType } from '@xivart/edge/types/kernel';
+import { Deck, SeatAssignment } from '@xivart/edge/types/postSale';
+import { Action } from 'redux';
+
+import { ActionTypes, KEY } from './constants';
+
+export interface BasicSeatPassenger {
+  firstName: string;
+  lastName: string;
+  passengerType: PassengerType;
+  passengerIndex: string;
+  seatAssignments: readonly SeatAssignment[];
+}
+
+export interface OwnDispatch {
+  setCurrentPassenger: (passenger?: BasicSeatPassenger) => void;
+  setCurrentSegmentIndex: (index: number) => void;
+  setSeatSelections: (selection: SeatSelection[]) => void;
+  setCurrentDeck: (deck: Deck) => void;
+  onChange: (selection: SeatSelection[]) => void;
+  onSubmit: (selection: SeatSelection[]) => void;
+  onActive: () => void;
+  onClose: (payload: LoadSelectionStatePayload) => void;
+  onMount: (selection: SeatSelection[]) => void;
+  onResetStore: () => void;
+  onLoadSelectionState: (payload: LoadSelectionStatePayload) => void;
+}
+
+export interface OwnProps {
+  isActive: boolean;
+  passengers: SeatAssignmentsPassenger[];
+  segments: SeatSegment[];
+  currentSegment: AvailableSegment;
+  seatSelectionsFromAssignments: SeatSelection[];
+  prevSeatSelections: SeatSelection[];
+}
+
+export interface State {
+  apiSeatSelections: SeatSelection[];
+  seatSelections: SeatSelection[];
+  prevSeatSelections: SeatSelection[];
+  currentPassenger?: SeatAssignmentsPassenger;
+  currentSegmentIndex?: number;
+  currentDeck?: Deck;
+  isSubmitting: boolean;
+  isSubmitErrored: boolean;
+}
+
+export type SeatContainerState = Record<typeof KEY, State | undefined>;
+
+export type SeatContainerProps = OwnProps &
+  Props &
+  Omit<State, 'apiSeatSelections' | 'prevSeatSelections'> &
+  OwnDispatch;
+
+export interface RenderProps {
+  segments: SeatSegment[];
+  passengers: SeatAssignmentsPassenger[];
+  seatSelections: SeatSelection[];
+  purchasedSeats: SeatSelection[];
+  prevSeatSelections: SeatSelection[];
+  isSubmitting: boolean;
+  isSubmitErrored: boolean;
+  isActive: boolean;
+  currentDeck?: Deck;
+  currentPassenger?: SeatAssignmentsPassenger;
+  currentSegment?: AvailableSegment;
+  currentSegmentIndex?: number;
+  setCurrentSegmentIndex: (index: number) => void;
+  setCurrentPassenger: (passenger: BasicSeatPassenger) => void;
+  setCurrentDeck: (deck: Deck) => void;
+  setSeatSelections: (selections: SeatSelection[]) => void;
+  onActive: () => void;
+  onClose: (payload: LoadSelectionStatePayload) => void;
+  onChange: () => void;
+  onSubmit: () => void;
+  onLoadSelectionState: (payload: LoadSelectionStatePayload) => void;
+}
+
+export interface LoadSelectionStatePayload {
+  seatSelections?: SeatSelection[];
+  prevSeatSelections?: SeatSelection[];
+}
+
+export interface Props {
+  children: (props: RenderProps) => ReactElement<any>;
+}
+
+interface MountAction extends Action {
+  type: ActionTypes.Mount;
+  payload: SeatSelection[];
+}
+
+interface ResetStoreAction extends Action {
+  type: ActionTypes.ResetStore;
+}
+
+interface LoadSelectionStateAction extends Action {
+  type: ActionTypes.LoadSelectionState;
+  payload: LoadSelectionStatePayload;
+}
+
+interface ChangePassengerAction extends Action {
+  type: ActionTypes.ChangePassenger;
+  payload?: BasicSeatPassenger;
+}
+
+interface ChangeSelectionsAction extends Action {
+  type: ActionTypes.ChangeSelections;
+  payload: SeatSelection[];
+}
+
+interface ChangeSegmentAction extends Action {
+  type: ActionTypes.ChangeSegmentIndex;
+  payload?: number;
+}
+
+interface ChangeDeckAction extends Action {
+  type: ActionTypes.ChangeDeck;
+  payload?: Deck;
+}
+
+export interface SubmitAction extends Action {
+  type: ActionTypes.Submit;
+  payload: SeatSelection[];
+}
+
+export interface ChangeAction extends Action {
+  type: ActionTypes.Change;
+  payload: SeatSelection[];
+}
+
+interface ChangeSuccessAction extends Action {
+  type: ActionTypes.ChangeSuccess;
+}
+
+interface ChangeErrorAction extends Action<ActionTypes.ChangeError> {
+  type: ActionTypes.ChangeError;
+}
+
+export type ChangePassenger = (
+  payload?: BasicSeatPassenger,
+) => ChangePassengerAction;
+
+export type ChangeSelections = (
+  payload: SeatSelection[],
+) => ChangeSelectionsAction;
+
+export type Mount = (payload: SeatSelection[]) => MountAction;
+
+export type ResetStore = () => ResetStoreAction;
+
+export type ChangeSegmentIndex = (payload?: number) => ChangeSegmentAction;
+
+export type ChangeDeck = (payload: Deck) => ChangeDeckAction;
+
+export type Submit = (payload: SeatSelection[]) => SubmitAction;
+
+export type Change = (payload: SeatSelection[]) => ChangeAction;
+
+export type ChangeSuccess = (payload: SeatSelection[]) => ChangeSuccessAction;
+
+export type ChangeError = () => ChangeErrorAction;
+
+export type LoadSelectionState = (
+  payload: LoadSelectionStatePayload,
+) => LoadSelectionStateAction;
+
+export interface SeatAssignmentsPassenger extends BasicSeatPassenger {
+  seatAssignments: readonly SeatAssignment[];
+}
+
+export interface AvailableSegment extends Omit<Segment, 'passengers'> {
+  direction: FlightDirection;
+  passengers: SeatAssignmentsPassenger[];
+  carrier?: Carrier;
+}
+
+export interface NotAvailableSegment {
+  arrivalAirportCity: string;
+  arrivalAirportCode: string;
+  departureAirportCity: string;
+  departureAirportCode: string;
+  decks: [];
+  direction: FlightDirection;
+  carrier?: Carrier;
+  seatSupplier?: string;
+  pnrId?: string;
+}
+
+export type SeatSegment = AvailableSegment | NotAvailableSegment;

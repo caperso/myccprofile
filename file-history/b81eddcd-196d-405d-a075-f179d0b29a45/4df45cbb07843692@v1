@@ -1,0 +1,14 @@
+import { SeatSelection } from '@xivart/edge/types/postSale';
+
+import { SeatSegment } from '~app/domains/PostSale/containers/SeatContainer/types';
+
+export interface SegmentSeatCardTitleProps {
+  segment: SeatSegment;
+  isActive: boolean;
+  onAdd: () => void;
+  onHide: () => void;
+  seatSelections: SeatSelection[];
+  purchasedSeats: SeatSelection[];
+  currentSegmentPrice: number;
+  isAllSegmentPurchased: boolean;
+}

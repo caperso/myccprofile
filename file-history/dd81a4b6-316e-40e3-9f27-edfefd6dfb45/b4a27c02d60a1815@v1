@@ -1,0 +1,29 @@
+import {
+  SeatAssignmentStatus,
+  SeatSelection,
+} from '@xivart/edge/types/postSale';
+
+import { SelectedSeat } from '~app/domains/PostSale/components/SeatMapHorizontally/components/Seat/types';
+
+export const getIsSelectedSeat = (
+  seatKey: string,
+  combinationId: string,
+  selections: SeatSelection[],
+): SelectedSeat | undefined => {
+  const selectedSeatSelection = selections.find(
+    (selection) =>
+      selection.seatKey === seatKey &&
+      selection.combinationId === combinationId,
+  );
+
+  if (selectedSeatSelection) {
+    return {
+      firstName: selectedSeatSelection.firstName,
+      lastName: selectedSeatSelection.lastName,
+      disabled: selectedSeatSelection.status === SeatAssignmentStatus.PURCHASED,
+      passengerIndex: selectedSeatSelection.passengerIndex,
+    };
+  }
+
+  return undefined;
+};

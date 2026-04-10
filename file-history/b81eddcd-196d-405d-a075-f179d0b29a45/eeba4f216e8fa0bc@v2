@@ -1,0 +1,150 @@
+import { Segment } from '@ctrip/myaccount-edge/types/postSale';
+import { AccountBookingDetailsV2 } from '@xivart/edge/types/account';
+import { BookingDetail } from '@xivart/edge/types/postSale';
+import { createSelector } from 'reselect';
+
+import {
+  NotAvailableSegment,
+  AvailableSegment,
+  SeatSegment,
+  SeatAssignmentsPassenger,
+} from '../types';
+import {
+  selectBookingDetail,
+  selectBookingDetails,
+} from '~app/domains/PostSale/containers/PostSaleBookingProductsContainer/selectors';
+import { selectSeatProducts } from '~app/domains/PostSale/containers/PostSaleBookingProductsContainer/selectors/selectSeatProducts';
+import { ClientPageLogTypes, logger } from '~app/logger';
+
+const handleBookingDetailSegments = (
+  responseSegments: readonly Segment[],
+  booking: BookingDetail | AccountBookingDetailsV2,
+) => {
+  const bookingSegments =
+    booking.legs?.flatMap((bookingLeg) => bookingLeg.segments || []) || [];
+
+  const passengersList = booking.passengers ?? [];
+  const bookingPassengersMap = new Map(
+    passengersList.map((passenger) => [
+      'id' in passenger ? passenger.id : passenger.passengerIndex,
+      passenger,
+    ]),
+  );
+
+  const segments: SeatSegment[] = bookingSegments.map((bookingSegment) => {
+    const seatSegment: Segment | undefined = responseSegments.find(
+      (segment) => segment.segmentIdentifier === bookingSegment.identifier,
+    );
+
+    if (seatSegment && !seatSegment.decks?.length) {
+      logger.warn({
+        messageType: ClientPageLogTypes.PostSaleSeatNoDecks,
+        error: {
+          code: ClientPageLogTypes.PostSaleSeatNoDecks,
+          message: seatSegment.segmentIdentifier,
+          stacktrace: JSON.stringify(Error().stack),
+          source: __filename,
+        },
+      });
+    }
+
+    if (!seatSegment) {
+      logger.warn({
+        messageType: ClientPageLogTypes.PostSaleSegmentNotMatched,
+        error: {
+          code: ClientPageLogTypes.PostSaleSegmentNotMatched,
+          message: `order number: ${booking.bookingId}, booking segment identifier: ${bookingSegment.identifier}`,
+          stacktrace: JSON.stringify(Error().stack),
+          source: __filename,
+        },
+      });
+
+      if (responseSegments.length) {
+        const hasSameFlightNumber = !!responseSegments.find(
+          (segment) =>
+            Number(segment.flightNumber) ===
+            Number(bookingSegment.flightNumber),
+        );
+
+        logger.warn({
+          messageType: ClientPageLogTypes.PostSaleSeatFlightNumberNotMatched,
+          error: {
+            code: ClientPageLogTypes.PostSaleSeatFlightNumberNotMatched,
+            message: `hasSameFlightNumber: ${hasSameFlightNumber}, order flight number: ${
+              bookingSegment.flightNumber
+            }, seat segments: ${JSON.stringify(
+              responseSegments.map(({ flightNumber }) => flightNumber),
+            )}`,
+            stacktrace: JSON.stringify(Error().stack),
+            source: __filename,
+          },
+        });
+      }
+    }
+
+    if (!seatSegment || !seatSegment.decks.length) {
+      const seatNotAvailableSegment: NotAvailableSegment = {
+        arrivalAirportCity: bookingSegment.arrival.city,
+        arrivalAirportCode: bookingSegment.arrival.code,
+        departureAirportCity: bookingSegment.departure.city,
+        departureAirportCode: bookingSegment.departure.code,
+        direction: bookingSegment.direction,
+        decks: [],
+        carrier: bookingSegment.carrier,
+      };
+
+      return seatNotAvailableSegment;
+    }
+
+    const passengers = seatSegment.passengers.reduce<
+      SeatAssignmentsPassenger[]
+    >((acc, seatPassenger) => {
+      const bookingPassenger = bookingPassengersMap.get(
+        seatPassenger.passengerIndex,
+      );
+
+      if (bookingPassenger) {
+        acc.push({
+          firstName: bookingPassenger.firstName,
+          lastName: bookingPassenger.lastName,
+          passengerType: bookingPassenger.passengerType,
+          passengerIndex: String(seatPassenger.passengerIndex),
+          seatAssignments: seatPassenger.seatAssignments,
+        });
+      }
+      return acc;
+    }, []);
+
+    const segment: AvailableSegment = {
+      ...seatSegment,
+      passengers,
+      direction: bookingSegment.direction,
+      carrier: bookingSegment.carrier,
+    };
+
+    return segment;
+  });
+
+  return segments;
+};
+
+export const selectSegments = createSelector(
+  selectSeatProducts,
+  selectBookingDetails,
+  selectBookingDetail,
+  (data, bookingDetails, bookingDetail) => {
+    if (!data?.segments) return [];
+
+    if (bookingDetail) {
+      return handleBookingDetailSegments(data.segments, bookingDetail);
+    }
+
+    if (!bookingDetails.length) {
+      return [];
+    }
+
+    return bookingDetails.flatMap((booking) =>
+      handleBookingDetailSegments(data.segments, booking),
+    );
+  },
+);

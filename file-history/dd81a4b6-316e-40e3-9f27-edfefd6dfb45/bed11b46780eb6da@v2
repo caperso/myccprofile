@@ -1,0 +1,12 @@
+import { SeatSelection } from '@ctrip/myaccount-edge/types/postSale';
+
+export const getCurrentPassengerSelection = (
+  selections: SeatSelection[],
+  currentPassengerIndex: string,
+  currentCombinationId: string,
+): SeatSelection | undefined =>
+  selections.find(
+    ({ passengerIndex, combinationId }) =>
+      passengerIndex === currentPassengerIndex &&
+      combinationId === currentCombinationId,
+  );

@@ -1,0 +1,56 @@
+import { SeatSelection } from '@ctrip/myaccount-edge/types/postSale';
+import { createSelector } from 'reselect';
+
+import { selectBookingDetail } from '~app/domains/PostSale/containers/PostSaleBookingProductsContainer/selectors';
+import { selectSeatProducts } from '~app/domains/PostSale/containers/PostSaleBookingProductsContainer/selectors/selectSeatProducts';
+
+export const selectSeatSelectionsFromAssignments = createSelector(
+  selectSeatProducts,
+  selectBookingDetail,
+  (seatProducts, bookingDetail): SeatSelection[] => {
+    if (!seatProducts?.segments || !bookingDetail) {
+      return [];
+    }
+
+    const selections: SeatSelection[] = seatProducts.segments.flatMap(
+      ({
+        passengers,
+        segmentIdentifier,
+        segmentId,
+        combinationId,
+        pnrId,
+        pnrRecordLocator,
+      }) =>
+        passengers.flatMap(({ passengerIndex, seatAssignments }) => {
+          const bookingPassenger = bookingDetail.passengers?.find(
+            (pax) => pax.id === passengerIndex,
+          );
+
+          if (!bookingPassenger) {
+            return [];
+          }
+
+          const seatAssignmentsFromSegment: SeatSelection[] = seatAssignments.map(
+            ({ seatKey, seatDisplayPrice, type, status }) => ({
+              passengerIndex: bookingPassenger.id,
+              pnrId,
+              seatKey,
+              seatPrice: seatDisplayPrice,
+              firstName: bookingPassenger.firstName,
+              lastName: bookingPassenger.lastName,
+              segmentId,
+              segmentIdentifier,
+              combinationId,
+              pnr: pnrRecordLocator,
+              type,
+              status,
+            }),
+          );
+
+          return seatAssignmentsFromSegment;
+        }),
+    );
+
+    return selections;
+  },
+);

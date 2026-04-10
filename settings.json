@@ -18,7 +18,28 @@
       "Bash(git for-each-ref:*)",
       "Bash(git version:*)",
       "Bash(git --version)",
-      "Bash(brew list:*)"
+      "Bash(brew list:*)",
+      "Bash(npm run:*)",
+      "Bash(npx tsc:*)",
+      "Bash(./node_modules/.bin/tsc -p tsconfig.json --noEmit)",
+      "Bash(export PATH=\"/usr/local/bin:/opt/homebrew/bin:$PATH\")",
+      "Bash(zsh -l -c \"source ~/.zprofile && npm run test\")",
+      "Bash(zsh -l -c \"source ~/.zprofile && npm run test -- --testPathPattern='SeatContainer' --verbose 2>&1\")",
+      "Bash(zsh -l -c \"source ~/.zprofile && npm run test -- --testPathPattern='SeatContainer' 2>&1\")",
+      "Bash(zsh -l -c \"source ~/.zprofile && git show ed903817a05f35ee4b74f7996435f5149f964002 --stat 2>&1\")",
+      "Bash(zsh -l -c \"source ~/.zprofile && git show ed903817a05f35ee4b74f7996435f5149f964002 -- src/domains/PostSale/containers/SeatContainer 2>&1\")",
+      "Bash(zsh -l -c \"source ~/.zprofile && npm run test -- --testPathPattern='selectSegments|selectSeatSelectionsFromAssignments|createSeatAssignmentPayload' 2>&1\")",
+      "Bash(zsh -l -c \"source ~/.zprofile && npm run test -- --testPathPattern='selectSegments.test' 2>&1\")",
+      "Bash(zsh -l -c \"source ~/.zprofile && npm run test -- --testPathPattern='selectSegments.test' --verbose 2>&1\")",
+      "Bash(ls -la /Users/caper/code-work/origami-trip/jest.config.*)",
+      "Bash(zsh -l -c \"source ~/.zprofile && npm run check:types 2>&1\")",
+      "Bash(zsh -l -c \"source ~/.zprofile && grep -rl \\\\\"@xivart/edge/types/postSale'\\\\\" src/ | head -50\")",
+      "Bash(xargs sed:*)",
+      "Bash(xargs -I {} perl -i -pe \"s/\\\\@xivart\\\\/edge\\\\/types\\\\/postSale/\\\\@ctrip\\\\/myaccount-edge\\\\/types\\\\/postSale/g\" {})",
+      "Bash(zsh -l -c \"source ~/.zprofile && node ./node_modules/jest/bin/jest.js -u 2>&1\")",
+      "Bash(zsh -l -c \"source ~/.zprofile && node ./node_modules/jest/bin/jest.js --testPathPattern='selectSegments.test' 2>&1\")",
+      "Bash(zsh -l -c \"source ~/.zprofile && git show ed903817a05f35ee4b74f7996435f5149f964002 -- src/internal/apiMocks/postSale/basicObjects/SegmentsMock.tsx 2>&1\")",
+      "Bash(zsh -l -c \"source ~/.zprofile && node ./node_modules/jest/bin/jest.js --testPathPattern='SeatContainer' 2>&1\")"
     ]
   }
 }

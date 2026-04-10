@@ -4601,15 +4601,18 @@ alias -- which-command=whence
 # Check for rg availability
 if ! (unalias rg 2>/dev/null; command -v rg) >/dev/null 2>&1; then
   function rg {
+  local _cc_bin="${CLAUDE_CODE_EXECPATH:-}"
+  [[ -x $_cc_bin ]] || _cc_bin=$(command -v claude 2>/dev/null)
+  if [[ ! -x $_cc_bin ]]; then command rg "$@"; return; fi
   if [[ -n $ZSH_VERSION ]]; then
-    ARGV0=rg /Users/caper/.vscode/extensions/anthropic.claude-code-2.1.90-darwin-arm64/resources/native-binary/claude "$@"
+    ARGV0=rg "$_cc_bin" "$@"
   elif [[ "$OSTYPE" == "msys" ]] || [[ "$OSTYPE" == "cygwin" ]] || [[ "$OSTYPE" == "win32" ]]; then
-    ARGV0=rg /Users/caper/.vscode/extensions/anthropic.claude-code-2.1.90-darwin-arm64/resources/native-binary/claude "$@"
+    ARGV0=rg "$_cc_bin" "$@"
   elif [[ $BASHPID != $$ ]]; then
-    exec -a rg /Users/caper/.vscode/extensions/anthropic.claude-code-2.1.90-darwin-arm64/resources/native-binary/claude "$@"
+    exec -a rg "$_cc_bin" "$@"
   else
-    (exec -a rg /Users/caper/.vscode/extensions/anthropic.claude-code-2.1.90-darwin-arm64/resources/native-binary/claude "$@")
+    (exec -a rg "$_cc_bin" "$@")
   fi
 }
 fi
-export PATH=/opt/homebrew/opt/python@3.12/Frameworks/Python.framework/Versions/3.12/bin:/Users/caper/.local/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/Users/caper/.nvm/versions/node/v22.15.1/bin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin
+export PATH=/Users/caper/.local/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/Users/caper/.nvm/versions/node/v22.15.1/bin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin
