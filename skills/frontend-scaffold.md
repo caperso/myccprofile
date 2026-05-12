@@ -282,6 +282,12 @@ export const Default: StoryObj<typeof BaggageChip> = {
 - 启用：`no-use-before-define`、`no-shadow`、`prefer-destructuring`、`camelcase`、`no-constructor-return`
 - 禁全局 `sessionStorage` / `localStorage`，用 `Common/services/WebStorage`
 - `no-underscore-dangle`（仅允许 `__REDUX_DEVTOOLS_EXTENSION_COMPOSE__`、`__TRAVIX_WEB_HELPER_ENHANCE__`）
+- **避免 `any`**：
+  - 绝对禁 `any`、`as any`、`cost?: any` 这类泛型/字段约束 —— 会让整条数据流丢失类型检查
+  - 需要"弱约束字段上的值"时，从 domain 类型包导入准确类型（如 `BaggageCost` from `@ctrip/booking-edge/types/order`），作为独立参数传递或在 interface 里声明
+  - 上游已守卫过的可选字段（如 `option.cost?.amountTotal` 被 `if` 过滤）：把守卫后的值作为显式参数往下传，而不是在下游重复 `?.` 然后 cast `any`
+  - 测试里唯一允许 `as unknown as X`（仍不允许 `as any`）的场景：构造运行时有但 TS 类型不完整的 mock 对象（如把 `benefits: string[]` 写进 `CabinBaggageOption` 时）
+  - 如果你确实需要一个"任意对象"占位，用 `unknown` 而不是 `any`
 
 **React**
 
