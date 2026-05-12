@@ -263,7 +263,6 @@ export const Default: StoryObj<typeof BaggageChip> = {
 - 本仓库默认远程为 `origin` 主分支`dev-master`
 - 推送使用 force：`git push origin <branch> --force`（或等价的 `--force-with-lease`）
 - 用户说 "push" / "推一下" / "git push" 时，按上述命令直接执行，无需再次确认远程名或 force 策略
-- commit title description信息简洁易读
 - 例外：若用户显式指定其它远程或禁止 force，按用户指令
 
 ---

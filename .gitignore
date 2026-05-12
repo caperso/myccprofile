@@ -1,0 +1,47 @@
+# macOS
+.DS_Store
+
+# Auto-generated runtime files
+.last-cleanup
+policy-limits.json
+history.jsonl
+
+# Conversation history (sensitive)
+projects/
+
+# File edit history (large, auto-generated)
+file-history/
+
+# Backups (auto-generated)
+backups/
+
+# Debug logs
+debug/
+
+# Session state (process-specific)
+sessions/
+session-env/
+
+# IDE lock files
+ide/
+
+# Shell snapshots (machine-specific)
+shell-snapshots/
+
+# Telemetry
+telemetry/
+
+# Todos (session-specific)
+todos/
+
+# Plans (auto-generated)
+plans/
+
+# Plugin cache
+plugins/install-counts-cache.json
+
+# Downloads
+downloads/
+
+# Local machine-specific settings
+settings.local.json

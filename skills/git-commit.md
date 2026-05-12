@@ -146,5 +146,5 @@ scope 的选取**必须**先观察当前仓库历史,按仓库实际习惯来。
 - ❌ 不要用中文 subject
 - ❌ 不要引入当前仓库 `git log` 中从未出现的 type 风格
 - ❌ 不要用 `-uall`、不要 `--no-verify`、不要擅自 `--amend`
-- ❌ 没和用户确认前不要 `git push`
+- ❌ 没和用户确认前不要 `git push`（例外：项目级 skill 有明确 push 约定时，遵从项目级配置）
 - ❌ 不要擅自用 `git add -A` / `git add .`,用具名文件列表
