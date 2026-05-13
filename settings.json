@@ -1,12 +1,7 @@
 {
   "env": {
-    "ANTHROPIC_AUTH_TOKEN": "sk-cp-qu9dOZAbrdRqxznov9vEzKsMJ_OyzQcgRDc15qvQb3rr1GlFmGXNwd4WCoGg83XJqBz4NOpl7Itkr5PSCDGKw_bM8CXKYEdpNNzTS6xg7xU8BjZdSg1s938",
-    "ANTHROPIC_BASE_URL": "https://api.minimaxi.com/anthropic",
-    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "MiniMax-M2.7",
-    "ANTHROPIC_DEFAULT_OPUS_MODEL": "MiniMax-M2.7",
-    "ANTHROPIC_DEFAULT_SONNET_MODEL": "MiniMax-M2.7",
-    "ANTHROPIC_MODEL": "MiniMax-M2.7",
-    "ANTHROPIC_REASONING_MODEL": "MiniMax-M2.7",
+    "ANTHROPIC_AUTH_TOKEN": "ada_47dca900e7e74e9aac60f2c522f2bf95",
+    "ANTHROPIC_BASE_URL": "http://ada-cli-golang.ctripcorp.com",
     "API_TIMEOUT_MS": "3000000",
     "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1"
   },
@@ -39,7 +34,16 @@
       "Bash(zsh -l -c \"source ~/.zprofile && node ./node_modules/jest/bin/jest.js -u 2>&1\")",
       "Bash(zsh -l -c \"source ~/.zprofile && node ./node_modules/jest/bin/jest.js --testPathPattern='selectSegments.test' 2>&1\")",
       "Bash(zsh -l -c \"source ~/.zprofile && git show ed903817a05f35ee4b74f7996435f5149f964002 -- src/internal/apiMocks/postSale/basicObjects/SegmentsMock.tsx 2>&1\")",
-      "Bash(zsh -l -c \"source ~/.zprofile && node ./node_modules/jest/bin/jest.js --testPathPattern='SeatContainer' 2>&1\")"
+      "Bash(zsh -l -c \"source ~/.zprofile && node ./node_modules/jest/bin/jest.js --testPathPattern='SeatContainer' 2>&1\")",
+      "Bash(ls -la /Users/caper/code-work/origami-trip/*.config.* /Users/caper/code-work/origami-trip/*.config.js)",
+      "Bash(find /Users/caper/code-work/origami-trip/node_modules/@ctrip/nfes-next -name \"*.js\" -exec grep -l \"dotenv\\\\|loadEnv\" {} \\\\;)",
+      "Bash(pnpm test *)",
+      "Bash(node /Users/caper/.npm/bin/nppx test -- --testPathPattern=\"BundlesContainer/__tests__/BundlesContainer.test.tsx\" --coverage)"
+    ],
+    "additionalDirectories": [
+      "/Users/caper/.claude/skills"
     ]
-  }
+  },
+  "model": "haiku",
+  "theme": "light"
 }

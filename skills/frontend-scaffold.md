@@ -4,9 +4,9 @@ description: origami-trip 项目前端代码编排脚手架。当用户需要新
 type: skill
 ---
 
-# Frontend Scaffold Skill (origami-trip)
+# Frontend Scaffold Skill (origami)
 
-- 用于在 名字中**包含** `origami-trip` 仓库
+- 用于在 名字中**包含** `origami` 仓库
   - 在仓库中新建组件/容器/selector 时，决定**落在哪**、**怎么组织文件**、**怎么编排单测与 storybook**。
   - 在仓库用于检查现有文件编排、domain合理性
 
@@ -241,20 +241,23 @@ export const Default: StoryObj<typeof BaggageChip> = {
 
 ---
 
-## 9. 一些标准做法模式（要这么做）
+## 9. 标准做法模式（要这么做）和反模式（不要这么做）
 
-- ✅ 使用`import type` `export type`的形式将types.tsx文件的type内容对外暴露
+DO:
 
----
+- ✅ 使用 `export type { A, B } from '...'` 的形式（纯类型导出）将 types.tsx 文件的 type 内容对外暴露
+  - 正确：`export type { BaggageCodeResolver, BaggageCostResult } from './buildBaggageCostItems';`
+  - 错误：`export { type BaggageCodeResolver, type BaggageCostResult } from './buildBaggageCostItems';`
+  - 原因：TypeScript 3.8+ 纯类型导出语法，语义明确且编译时消除，避免混合导出带来的歧义
 
-## 9. 反模式（不要这么做）
+DO NOT:
 
-- ❌ 把多个组件塞进同一个 `XxxComponents.tsx`
-- ❌ 在 `index.tsx` 里写实现逻辑
-- ❌ 把只有单一消费者的子组件放到 `Common`
-- ❌ 跨 domain 从 `~app/domains/A/...` 深入到对方的 `components/内部/子组件`——应通过对方 `index.tsx` 暴露的公共接口
-- ❌ 测试里 mock `@xivart/tangram/*` 或 `localize`
-- ❌ 源代码中留除了 `TODO` 以外的解释性注释
+- ❌ 把多个组件塞进同一个 XxxComponents.tsx
+- ❌ 在 index.tsx 里写实现逻辑
+- ❌ 把只有单一消费者的子组件放到 Common
+- ❌ 跨 domain 从 ~app/domains/A/... 深入到对方的 components/内部/子组件——应通过对方 index.tsx 暴露的公共接口
+- ❌ 测试里 mock @xivart/tangram/* 或 localize
+- ❌ 源代码中留除了 TODO 以外的解释性注释
 
 ---
 
